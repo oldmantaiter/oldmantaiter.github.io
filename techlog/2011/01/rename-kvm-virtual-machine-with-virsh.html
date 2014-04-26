@@ -8,7 +8,7 @@
         <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
         <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
 
-        <title>Posts Incoming // tait.clarridge // Devops all day every day.</title>
+        <title>Rename KVM Virtual Machine with virsh // tait.clarridge // Devops all day every day.</title>
 
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
@@ -36,7 +36,7 @@
                 <h2 class="article-info">Tait Clarridge</h2>
                 <small class="about-author"></small>
                 <h5>Published</h5>
-                <p>Fri 25 April 2014</p>
+                <p>Tue 11 January 2011</p>
                 <a href="/">&larr;Home</a>
             </hgroup>
         </header>
@@ -45,14 +45,30 @@
         <div class="content">
             <section class="post">
                 <header class="post-header">
-                    <h1>Posts Incoming</h1>
+                    <h1>Rename KVM Virtual Machine with virsh</h1>
                         <p class="post-meta">
-                            // under                                 <a class="post-category" href="../../../tag/announcement.html">announcement</a>
+                            // under                                 <a class="post-category" href="../../../tag/kvm.html">kvm</a>
+                                <a class="post-category" href="../../../tag/virsh.html">virsh</a>
                         </p>
                 </header>
             </section>
-            <p>Well, it is time for me to embrace github and stop using a hosted environment for my tiny tech blog.</p>
-<p>Over the coming days I will be porting the necessary things over and adding new thoughts and ideas.</p>
+            <p>Decided to play around with virsh today to see if I could rename some VMs that changed their hostname and purpose. It's actually quite simple!</p>
+<p>I am using Fedora 14 for this but I assume it will work for Ubuntu and CentOS as well.</p>
+<p>You must have elevated privileges for this to work so either become root or use sudo.</p>
+<p>Power off the virtual machine and export the machine's XML configuration file:</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> virsh dumpxml name_of_vm &gt; name_of_vm.xml
+</pre></div>
+<p>Next, edit the XML file and change the name between the <strong>&lt;name&gt;&lt;/name&gt;</strong> tags (should be right near the top). As an added step you could also rename the disk file to reflect the change of the name and change the name of it in the <strong>&lt;devices&gt;</strong> section under <strong>&lt;source file='/path/to/name_of_vm.img'&gt;</strong>.</p>
+<p>Save the XML file and undefine the old VM name with:</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> virsh undefine name_of_vm
+</pre></div>
+<p>Now just import the edited XML file to define the VM:</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> virsh define name_of_vm.xml
+</pre></div>
+<p>And that should be it! You can now start up your vm either in the Virtual Machine Manager or with virsh using:</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> virsh start name_of_vm
+</pre></div>
+<p>Hope this was helpful!</p>
 
             <div class="hr"></div>
             <a href="#" class="go-top">Go Top</a>

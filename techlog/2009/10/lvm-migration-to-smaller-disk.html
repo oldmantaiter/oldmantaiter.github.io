@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>LVM Migration to smaller disk // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Tue 20 October 2009</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>LVM Migration to smaller disk</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/lvm.html">lvm</a>
+                                <a class="post-category" href="../../../tag/linux.html">linux</a>
+                        </p>
+                </header>
+            </section>
+            <p>Recently I purchased an SSD (OCZ Agility 60GB) to put into my Asus EEEPC-1000HE and wanted to migrate everything from my default 160GB drive to the new SSD. This required resizing of the LVM prior to copying the partitions across to the SSD.</p>
+<p>It is also very important that your logical volumes you wish to resize and migrate aren't filled with more data than the destination drive will hold!</p>
+<p>For example my root LV (called lv_root) had 9GB in use so it was alright for me to resize and transfer to the new system.</p>
+<p>Also, you will probably need to remove your swap LV (if your swap is configured as an LV), there will be an example of how to do that.</p>
+<p><strong>Required Items:</strong></p>
+<ul class="simple">
+<li>USB Drive or Blank CDROM</li>
+<li>liveusb-creator (if using USB method)</li>
+<li>(Optional)Fedora LiveCD Iso</li>
+<li>USB SATA II connector or secondary SATA port on your motherboard</li>
+</ul>
+<p>Now you can create the LiveUSB or LiveCD of Fedora. Do this now!</p>
+<p>Have all the above items? Lets get started.</p>
+<p><em>IMPORTANT</em>: You need to create a full backup of data on your drive, or at least copy the important files to a safe location. Do not forget to do this, if the LVM resizing fails you will be without all your data!</p>
+<p>So, after you backup your system you need to install the new drive.</p>
+<p>I used a USB SATA / IDE adapter that can handle both formats in 3.5&quot; and 2.5&quot; sizes, it can be found on TigerDirect's website here.</p>
+<p>My instructions are going to be for my EEEPC-1000HE so if you have any questions, leave a comment.</p>
+<p>My guess is that if you are using a desktop system, you will need to use the SATA connection that your original drive was using for the new one and use a secondary connection for your old hard drive.</p>
+<p>Throughout this how-to you will see <strong>[root&#64;host ~]#</strong> , this is the command prompt and yours may be different, simply enter the commands in your terminal as they appear after the prompt.</p>
+<div class="section" id="step-one-install-the-smaller-hard-drive-in-the-eeepc">
+<h2>Step One: Install the smaller hard drive in the EEEPC</h2>
+<p>This is a pretty straightforward step, unplug your machine and remove the battery. Open up the bottom access panel and unplug and remove the old hard drive. Remove the old hard drive from the tray and replace it with the smaller drive, now you can place it back into the machine.</p>
+</div>
+<div class="section" id="step-two-plug-in-the-old-hard-drive-into-the-usb-to-sata-adaptor-or-another-sata-port">
+<h2>Step Two: Plug in the old hard drive into the USB to SATA adaptor (or another SATA port)</h2>
+<p>This is another straightforward step, since I was using a USB adapter I had to plug in the necessary cables into my drive (they were included in the adapter kit).</p>
+<p><em>IMPORTANT</em>: Do not plug this into the computer yet if booting off a USB drive (required for EEEPC).</p>
+</div>
+<div class="section" id="step-three-boot-into-fedora-live-either-off-of-a-usb-or-cdrom-as-described-in-the-required-section">
+<h2>Step Three: Boot into Fedora Live (either off of a USB or CDROM as described in the required section).</h2>
+<p>You may be required to set some BIOS options to allow USB booting (if using this method). In the case of my EEEPC I had to plug in the USB drive containing the Fedora Live system then access the BIOS and set the hard drive boot options to have &quot;usb: removable drive&quot; at the top.</p>
+<p>Now you can start up your machine and it should boot into the Live system</p>
+</div>
+<div class="section" id="step-four-if-required-plug-in-the-original-hard-drive-using-the-usb-adapter-after-live-system-has-booted">
+<h2>Step Four: (if required) Plug in the original hard drive using the USB adapter after Live system has booted</h2>
+<p>This is done after booting the system to ensure that there are no conflicts with USB devices to boot off of in the BIOS.</p>
+</div>
+<div class="section" id="step-five-find-the-drive-names-for-your-system-to-use-in-the-migration-process">
+<h2>Step Five: Find the drive names for your system to use in the migration process</h2>
+<p>You will need to make sure the drives aren't mounted anywhere, this is shown below.
+There are a few ways you can do this, but the easiest way is to fire up a terminal and become the superuser (root):</p>
+<p>In the terminal:</p>
+<div class="highlight"><pre><span class="gp">[liveuser@host ~]$</span> su -
+<span class="gp">[root@host ~]#</span> mount
+</pre></div>
+<p>If there is anything that shows /dev/sdb1 (old hard drive) or your volume groups (they shouldn't be mounted in a live system), unmount them with:</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> umount /dev/sdb1
+<span class="go"># Or for volume group</span>
+<span class="gp">[root@host ~]#</span> umount /dev/vg_yourvg-lv_yourlv
+</pre></div>
+<p>Now lets list the disks</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> fdisk -l
+<span class="go">Disk /dev/sda: 60.0GB, xxxxxxxxxxxxx bytes</span>
+<span class="go">xxx heads, xx sectors/track, xxxxx cylinders</span>
+<span class="go">Units = cylinders of xxxxx * xxx = xxxxxxxx bytes</span>
+<span class="go">Disk identifier: xxxxxxxx</span>
+
+<span class="go"> Disk /dev/sda doesn&#39;t contain a valid partition table</span>
+
+<span class="go"># (this is normal if the disk is new)</span>
+
+<span class="go">Disk /dev/sdb: 160.0GB, xxxxxxxxxxxxxx bytes</span>
+<span class="go">xxx heads, xx sectors/track, xxxxx cylinders</span>
+<span class="go">Units = cylinders of xxxxxxx * xxx = xxxxxxxxxxxxx bytes</span>
+<span class="go">Disk identifier: xxxxxxxxxxxx</span>
+
+<span class="go">  Device  Boot   Start   End   Blocks   Id    System</span>
+<span class="go">/dev/sdb1  *     x       xx    xxxxxx   83   Linux</span>
+<span class="go">/dev/sdb2        xx      xxxxx xxxxxxxx 8e   Linux LVM</span>
+</pre></div>
+<p>(It may also show a bunch of devices called /dev/dm-0, /dev/dm-1, /dev/dm-2 with messages saying &quot;Disk /dev/dm-x doesn't contain a valid partition table. This is normal, just ignore these for the purposes if this post)</p>
+<p>So our values for the rest of this howto are:
+<strong>New disk</strong>: /dev/sda
+<strong>Old disk</strong>: /dev/sdb</p>
+</div>
+<div class="section" id="step-six-create-partition-layout-on-new-hdd">
+<h2>Step Six: Create partition layout on new HDD</h2>
+<p>Since we now have the drive names, we can go ahead and partition the new disk to have the two partitions (your disk setup might be different, mine had /boot on the first partition and the LVM on the second partition).</p>
+<p><strong>EDIT</strong> from the future: I'm showing fdisk here, but you can do the same thing with any partition editing (I prefer parted these days)</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> fdisk /dev/sda
+
+<span class="go">Command (m for help): o</span>
+<span class="go">Building a new DOS disklabel with disk identifier xxxxxxxxxxxx</span>
+<span class="go">Changes will remain in memory only, until you decide to write them.</span>
+<span class="go">After that, of course, the previous content won&#39;t be recoverable.</span>
+
+<span class="go">### If you get a warning about invalid flags, those are OK too.</span>
+
+<span class="go">Command (m for help): n</span>
+<span class="go">Command action</span>
+<span class="go">  e   extended</span>
+<span class="go">  p   primary partition (1-4)</span>
+<span class="go">p (this is my input)</span>
+<span class="go">Partition number (1-4): 1</span>
+<span class="go">First cylinder (1-xxxx, default 1): 1</span>
+<span class="go">### I chose 250 MB for extra kernel installs/preupgrade</span>
+<span class="go">Last cylinder, +cylinders or +size{K,M,G} (1-xxx, default xxx): +250M</span>
+
+<span class="go">Command (m for help): n</span>
+<span class="go">Command action</span>
+<span class="go">   e    extended</span>
+<span class="go">   p    primary partition (1-4)</span>
+<span class="go">p</span>
+<span class="go">Partition number (1-4): 2</span>
+<span class="go">### Pressing enter through these should make it the rest of the disk</span>
+<span class="go">First cylinder (xx-xxxx, default xxx): &lt;press enter&gt;</span>
+<span class="go">Using default value xxx</span>
+<span class="go">Last cylinder, +cylinders or +size{K,M,G} (xx-xxxx, default xxxx): &lt;press enter&gt;</span>
+<span class="go">Using default value xxxx</span>
+
+<span class="go">Command (m for help): t</span>
+<span class="go">Partition number (1-4): 2</span>
+<span class="go">Hex code (type L to list codes): 8e</span>
+<span class="go">Changed system partition 2 to 8e (Linux LVM)</span>
+
+<span class="go">Command (m for help): w</span>
+<span class="go">The partition table has been altered!</span>
+
+<span class="go">Calling ioctl() to re-read partition table.</span>
+<span class="go">Syncing disks.</span>
+</pre></div>
+<p>Your partitions are now ready for some data!</p>
+</div>
+<div class="section" id="step-seven-copy-the-boot-partition-from-the-old-drive-to-the-new-drive-and-resize-it">
+<h2>Step Seven: Copy the boot partition from the old drive to the new drive and resize it</h2>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> e2fsck -f /dev/sdb1
+<span class="go">&lt;Output of e2fsck snipped&gt;</span>
+<span class="gp">[root@host ~]#</span> dd <span class="k">if</span><span class="o">=</span>/dev/sdb1 <span class="nv">of</span><span class="o">=</span>/dev/sda1
+<span class="go">&lt;Output of dd snipped&gt;</span>
+<span class="gp">[root@host ~]#</span> e2fsck -f /dev/sda1
+<span class="go">&lt;Output of e2fsck snipped&gt;</span>
+<span class="gp">[root@host ~]#</span> resize2fs /dev/sda1
+<span class="go">&lt;Output of resize2fs snipped&gt;</span>
+</pre></div>
+<p>The resize2fs output should say that it successfully resized the filesystem to a certain amount of blocks.</p>
+</div>
+<div class="section" id="step-eight-gather-information-on-your-lvm-structure">
+<h2>Step Eight: Gather information on your LVM structure</h2>
+<p>For this step, you need to make note of what your logical volumes, volume groups, and physical volumes are called.</p>
+<p>In this how to mine are as follows:</p>
+<ul class="simple">
+<li><strong>Root</strong>: lv_root</li>
+<li><strong>Swap</strong>: lv_swap</li>
+<li><strong>Volume Group</strong>: vg_taitsstuff</li>
+</ul>
+<p>The columns shown below are the only ones you should be concerned with.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> lvs
+<span class="go">LV            VG                  LSize</span>
+<span class="go">lv_root     vg_taitsstuff      144.xxG</span>
+<span class="go">lv_swap     vg_taitsstuff      4.xG</span>
+</pre></div>
+<p>So this shows my current logical volume setup where:</p>
+<p>lv_root is located on vg_taitsstuff and is 144.xxG in size
+lv_swap is located on vg_taitstuff and is 4.xG in size</p>
+<p>Now we can look at the information for the volume groups:</p>
+<p>The columns that have been omitted are unimportant at this point.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> vgs
+<span class="go">VG              #PV  #LV  #SN  VSize VFree</span>
+<span class="go">vg_taitsstuff  1        2      0    148.xxG   0</span>
+</pre></div>
+<p>This means that:</p>
+<p>vg_taitstuff is 148.xxG in size with no free space located on ONE physical volume and contains TWO logical volumes.</p>
+<p>So finally lets take a look at the physical volumes:
+Again, the omitted columns aren't important to us right now.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> pvs
+<span class="go">PV             VG               PSize    PFree</span>
+<span class="go">/dev/sdb2  vg_taitsstuff   148.xxG    0</span>
+</pre></div>
+<p>So this means that the only LVM physical volume I have is on /dev/sdb2  and is the same size as the volume group (since it is the only one there).</p>
+<p>The things you need to remember are:
+The name of the swap logical volume (mine: lv_swap)
+The name of the physical volume (mine: /dev/sdb2)</p>
+</div>
+<div class="section" id="step-nine-remove-swap-logical-volume">
+<h2>Step Nine: Remove SWAP logical volume</h2>
+<p>I was having issues with resizing due to the placement of my SWAP logical volume, so what I did was remove it (it will be recreated later with the information from the above section).</p>
+<p>So, lets turn the swap off and remove it:</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> swapoff -v /dev/vg_taitsstuff/lv_swap
+<span class="gp">[root@host ~]#</span> lvremove /dev/vg_taitsstuff/lv_swap
+</pre></div>
+</div>
+<div class="section" id="step-ten-resize-root-logical-volume">
+<h2>Step Ten: Resize ROOT logical volume</h2>
+<p>Since I have only one logical volume for my system (other than the swap we just deleted) this is relatively straightforward, if you have multiple partitions I am not able to help you at the moment.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> e2fsck -f /dev/vg_taitsstuff/lv_root
+<span class="go"># 50G was chosen so it was smaller than the size of the HDD, noobish I know.</span>
+<span class="gp">[root@host ~]#</span> resize2fs -p /dev/vg_taittstuff/lv_root 50G
+<span class="gp">[root@host ~]#</span> lvreduce --size 50G vg_taitsstuff/lv_root --test
+<span class="go"># If there were any errors in the test, do not issue the next command</span>
+<span class="gp">[root@host ~]#</span> lvreduce --size 50G vg_taitsstuff/lv_root
+</pre></div>
+</div>
+<div class="section" id="step-eleven-resize-the-physical-volume">
+<h2>Step Eleven: Resize the physical volume</h2>
+<p>Now we can resize the volume so it will fit in our new partition on the new disk.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> pvresize --setphysicalvolumesize 55G /dev/sdb2
+</pre></div>
+<p>This should complete successfully. The reason why I chose 55G was that it was greater than the filesystem size we set in Step 10 and less than the new hard drive size (60 GB)</p>
+</div>
+<div class="section" id="step-twelve-copy-the-old-partition-to-the-new-drive">
+<h2>Step Twelve: Copy the old partition to the new drive</h2>
+<p>Some people may argue that I am taking a round about way to do this, I did it this way because it made sense at the time. I tried migrating the volume groups without success so I did it this way.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> dd <span class="k">if</span><span class="o">=</span>/dev/sdb2 <span class="nv">of</span><span class="o">=</span>/dev/sda2
+</pre></div>
+<p>This will take a while depending on the size, also it may tell you that it ran out of space, this should be alright because it will already be finished writing the physical volume that we resized in the previous step.</p>
+</div>
+<div class="section" id="step-thirteen-physically-disconnect-the-old-drive">
+<h2>Step Thirteen: Physically disconnect the old drive</h2>
+</div>
+<div class="section" id="step-fourteen-resize-the-pv-on-the-new-drive">
+<h2>Step Fourteen: Resize the PV on the new drive</h2>
+<p>This step is so we can get full use of our LVM partition.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> pvresize /dev/sda2
+</pre></div>
+</div>
+<div class="section" id="step-fifteen-resize-the-logical-volume-and-filesystem-on-the-new-drive-and-create-the-new-swap-logical-volume">
+<h2>Step Fifteen: Resize the logical volume and filesystem on the new drive and create the new swap logical volume</h2>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> lvextend /dev/vg_taitsstuff/lv_root /dev/sda2
+<span class="go"># 4GB here is the size of the swap partition I want</span>
+<span class="gp">[root@host ~]#</span> lvreduce --size -4G vg_taitsstuff/lv_root
+<span class="gp">[root@host ~]#</span> lvcreate --name lv_swap vg_taitsstuff
+<span class="go"># There are a lot of these filesystem checks, some may say too many, but lets be safe</span>
+<span class="gp">[root@host ~]#</span> e2fsck -f /dev/vg_taitsstuff/lv_root
+<span class="gp">[root@host ~]#</span> resize2fs /dev/vg_taitsstuff/lv_root
+<span class="go"># Lets bring back that swap LV</span>
+<span class="gp">[root@host ~]#</span> mkswap /dev/vg_taitsstuff/lv_swap
+</pre></div>
+</div>
+<div class="section" id="step-seventeen-reinstall-grub-on-the-new-drive">
+<h2>Step Seventeen: Reinstall GRUB on the new drive</h2>
+<p>We need to activate the vg, mount the partitions, and reinstall grub.</p>
+<div class="highlight"><pre><span class="gp">[root@host ~]#</span> mkdir -p /mnt/temp/boot
+<span class="gp">[root@host ~]#</span> vgchange -a y
+<span class="gp">[root@host ~]#</span> mount /dev/sda1 /mnt/temp/boot
+<span class="gp">[root@host ~]#</span> mount /dev/vg_taitsstuff/lv_root /mnt/temp
+<span class="gp">[root@host ~]#</span> grub-install --root-directory<span class="o">=</span>/mnt/temp /dev/sda
+</pre></div>
+</div>
+<div class="section" id="step-eighteen-reboot">
+<h2>Step Eighteen: Reboot</h2>
+<p>Now that everything has reinstalled and been resized, it is time for a reboot! If your grub menu is just a prompt, not to worry.</p>
+<p>Just enter the following commands in the grub prompt (grub&gt;)</p>
+<div class="highlight"><pre><span class="go">grub&gt; kernel /vmlinuz-2.6.rest.of.your.kernel.version</span>
+<span class="go">grub&gt; initrd /initrd-2.6.same.as.above</span>
+</pre></div>
+<p>If you do not know the kernel version off hand, you can press tab twice after entering kernel and a forward slash and it will show the available versions. The same goes for the ramdisk (initrd), just make sure that the ramdisk version and the kernel version are the same.</p>
+<p>Once you login to your system just run &quot;grub-install /dev/sda&quot; as root and things should be back to normal.</p>
+<p>Remember. MAKE SURE YOU HAVE BACKED UP EVERYTHING. My instructions may not work for your setup so you should have a full backup (I did a &quot;dd&quot; of my entire disk to a file before I started resizing to an external hard drive while booted from a Live USB).</p>
+</div>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>

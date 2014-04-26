@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>tait.clarridge</title><link href="http://oldmantaiter.github.io/" rel="alternate"></link><link href="http://oldmantaiter.github.io/feeds/all-en.atom.xml" rel="self"></link><id>http://oldmantaiter.github.io/</id><updated>2014-04-25T18:52:00-04:00</updated><entry><title>Posts Incoming</title><link href="http://oldmantaiter.github.io/techlog/2014/04/posts-incoming.html" rel="alternate"></link><updated>2014-04-25T18:52:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2014-04-25:techlog/2014/04/posts-incoming.html</id><summary type="html">&lt;p&gt;Well, it is time for me to embrace github and stop using a hosted environment for my tiny tech blog.&lt;/p&gt;
 &lt;p&gt;Over the coming days I will be porting the necessary things over and adding new thoughts and ideas.&lt;/p&gt;
-</summary><category term="incoming"></category><category term="new"></category></entry><entry><title>FTP Load-Balanced through haproxy</title><link href="http://oldmantaiter.github.io/techlog/2012/09/ftp-load-balanced-through-haproxy.html" rel="alternate"></link><updated>2012-09-14T11:47:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2012-09-14:techlog/2012/09/ftp-load-balanced-through-haproxy.html</id><summary type="html">&lt;p&gt;I was asked to explore the possibility of having haproxy balance connections between multiple backend FTP servers. Luckily there is a way to do this without having to play with DNAT on the proxy server and instead setting it up with multiple backends in haproxy.&lt;/p&gt;
+</summary><category term="announcement"></category></entry><entry><title>FTP Load-Balanced through haproxy</title><link href="http://oldmantaiter.github.io/techlog/2012/09/ftp-load-balanced-through-haproxy.html" rel="alternate"></link><updated>2012-09-14T11:47:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2012-09-14:techlog/2012/09/ftp-load-balanced-through-haproxy.html</id><summary type="html">&lt;p&gt;I was asked to explore the possibility of having haproxy balance connections between multiple backend FTP servers. Luckily there is a way to do this without having to play with DNAT on the proxy server and instead setting it up with multiple backends in haproxy.&lt;/p&gt;
 &lt;p&gt;First you will need to setup a few FTP servers. I chose VSFTP (which can be installed on CentOS via &amp;quot;yum install vsftpd&amp;quot;)&lt;/p&gt;
 &lt;p&gt;As far as I know, this will only work properly with ftp passive mode. For that you can make the following vsftpd config&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[tait@foxtrot-tango-papa01 ~]$&lt;/span&gt; cat /etc/vsftpd/vsftpd.conf
@@ -97,4 +97,319 @@ foxtrot-tango-papa03: 10501 -&amp;gt; 10750&lt;/p&gt;
 &lt;p&gt;Now you should be able to start haproxy (ignore warnings or take care of them as you need to... like I said, very basic config) and ftp to it.&lt;/p&gt;
 &lt;p&gt;Be warned, this configuration makes haproxy bind to EVERY passive port listed, but you should be able to ftp to the haproxy IP and transfer files to and from your FTP server pool.&lt;/p&gt;
 &lt;p&gt;Leave a comment if you require any help, but as a basic config this should work.&lt;/p&gt;
-</summary><category term="haproxy"></category><category term="ftp"></category></entry></feed>
+</summary><category term="haproxy"></category><category term="ftp"></category></entry><entry><title>Rename KVM Virtual Machine with virsh</title><link href="http://oldmantaiter.github.io/techlog/2011/01/rename-kvm-virtual-machine-with-virsh.html" rel="alternate"></link><updated>2011-01-11T11:19:00-05:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2011-01-11:techlog/2011/01/rename-kvm-virtual-machine-with-virsh.html</id><summary type="html">&lt;p&gt;Decided to play around with virsh today to see if I could rename some VMs that changed their hostname and purpose. It's actually quite simple!&lt;/p&gt;
+&lt;p&gt;I am using Fedora 14 for this but I assume it will work for Ubuntu and CentOS as well.&lt;/p&gt;
+&lt;p&gt;You must have elevated privileges for this to work so either become root or use sudo.&lt;/p&gt;
+&lt;p&gt;Power off the virtual machine and export the machine's XML configuration file:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; virsh dumpxml name_of_vm &amp;gt; name_of_vm.xml
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Next, edit the XML file and change the name between the &lt;strong&gt;&amp;lt;name&amp;gt;&amp;lt;/name&amp;gt;&lt;/strong&gt; tags (should be right near the top). As an added step you could also rename the disk file to reflect the change of the name and change the name of it in the &lt;strong&gt;&amp;lt;devices&amp;gt;&lt;/strong&gt; section under &lt;strong&gt;&amp;lt;source file='/path/to/name_of_vm.img'&amp;gt;&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Save the XML file and undefine the old VM name with:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; virsh undefine name_of_vm
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now just import the edited XML file to define the VM:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; virsh define name_of_vm.xml
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And that should be it! You can now start up your vm either in the Virtual Machine Manager or with virsh using:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; virsh start name_of_vm
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Hope this was helpful!&lt;/p&gt;
+</summary><category term="kvm"></category><category term="virsh"></category></entry><entry><title>iptables - Route Traffic from Specific Interface to a Specific Gateway</title><link href="http://oldmantaiter.github.io/techlog/2009/10/iptables-route-traffic-from-specific-interface-to-a-specific-gateway.html" rel="alternate"></link><updated>2009-10-29T09:21:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2009-10-29:techlog/2009/10/iptables-route-traffic-from-specific-interface-to-a-specific-gateway.html</id><summary type="html">&lt;p&gt;Recently I set up Openfire as a corporate messaging service, the problem I ran into was that since our VPN server and Openfire server both have external access and are in the same address space, the VPN server would try to send the Openfire traffic out the external gateway but couldn't reach the server because of some ACLs that were set in place.&lt;/p&gt;
+&lt;p&gt;So what I did was take the traffic from the VPN tunnel that is going to the Openfire ports and route it through our internal network.&lt;/p&gt;
+&lt;p&gt;What you will need to do is create another route table and mark the desired packets with iptables.&lt;/p&gt;
+&lt;p&gt;First you should pick a table number to create, I picked table #300. I made sure that the table did not exist before creating it by doing the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip route show table 300
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This shouldn't return any information, if it does you must select a new one as it already contains routing data and overwriting it will most likely cause some issues.&lt;/p&gt;
+&lt;p&gt;Now that we know that the table doesn't exist, we are going to clear it anyways to make sure that it is clean.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip route flush table 300
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You may or may not get a message telling you that there was nothing to flush or it doesn't exist.&lt;/p&gt;
+&lt;p&gt;Next we have to pick a number to have iptables mark the packets with. I chose the number 85 because in one of my previous posts I had used 80 to do some custom routing.&lt;/p&gt;
+&lt;p&gt;To set an ip rule we need to figure out the hex value of the number above. The easiest way to do this is in a calculator that can display hex and decimal values. In GNOME you can select the calculator from Applications &amp;gt; Accessories &amp;gt; Calculator, then select View &amp;gt; Programming. To make the conversion, make sure that the &amp;quot;Dec&amp;quot; radio button is selected and type in the number you want (eg. 85). Now click the &amp;quot;Hex&amp;quot; radio button and it will give you the hex value. 85 becomes 55 so our rule will use 0x55 as the hex value. As I don't have a great understanding of hex, I am not sure if larger numbers would mean that the &amp;quot;0x&amp;quot; part preceding the hex value from the calculator would change.&lt;/p&gt;
+&lt;p&gt;Now we should check to make sure that no ip rule exists for our hex value.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip rule
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This will show all the rules that are active, if there is an entry that has 0x55 in it, pick another number.&lt;/p&gt;
+&lt;p&gt;Next, flush the rule to make it clean for us to use.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip rule del fwmark 0x55
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You will probably get a message that states &amp;quot;RTNETLINK answers: No such file or directory&amp;quot;, this is a good thing and means that it really does not exist.&lt;/p&gt;
+&lt;p&gt;So now we are ready to start creating the iptables rules, I do these first but you can do them after creating the routing rules if you would like (those will follow this section).&lt;/p&gt;
+&lt;p&gt;Our Openfire installation uses a custom port, but I will show this with the default ports (tcp ports 5222 and 5223). This will work for any port you would like. Our OpenVPN setup uses tun0 as the tunnel adaptor so that is the interface we wish to forward packets from.&lt;/p&gt;
+&lt;p&gt;We are going to use the PREROUTING table as we need to mark the packets before they get routed.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5222
+&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5223
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;As you can see, the --set-mark flag value is our number that we picked in a previous section. It correlates to the fwmark 0x55 rule that we will be creating (because they are equal values, just one is decimal and the other is hex).&lt;/p&gt;
+&lt;p&gt;The -i flag is the interface we want iptables to mark packets from.&lt;/p&gt;
+&lt;p&gt;The -p flag is for the protocol (tcp/udp) and the -dport flag is the destination port of the packets.&lt;/p&gt;
+&lt;p&gt;This basically means that any traffic coming through tun0 heading for tcp port 5222 or 5223 will get marked with the number 85.&lt;/p&gt;
+&lt;p&gt;So now we can set the routing rules to deal with the marked packets.&lt;/p&gt;
+&lt;p&gt;First we are going to set the default route for table 300 so all our marked packets will go through there. I am going to use 192.168.0.1 as the gateway.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip route add table 300 default via 192.168.0.1
+&lt;span class="go"&gt;# Now tell the rule which table to look up&lt;/span&gt;
+&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip rule add fwmark 0x55 table 300
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Remember that unless you make the rule persistent or have a script start on boot with these commands, the routing will not be there when you restart your machine.&lt;/p&gt;
+&lt;p&gt;A simple script would look like the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+
+ip route flush table 300
+ip rule del fwmark 0x55
+iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5222
+iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5223
+ip route add table 300 default via 192.168.0.1
+ip rule add fwmark 0x55 table 300
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you have any questions, feel free to leave me a comment or send me an email.&lt;/p&gt;
+</summary><category term="iptables"></category><category term="firewall"></category><category term="linux"></category></entry><entry><title>LVM Migration to smaller disk</title><link href="http://oldmantaiter.github.io/techlog/2009/10/lvm-migration-to-smaller-disk.html" rel="alternate"></link><updated>2009-10-20T11:59:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2009-10-20:techlog/2009/10/lvm-migration-to-smaller-disk.html</id><summary type="html">&lt;p&gt;Recently I purchased an SSD (OCZ Agility 60GB) to put into my Asus EEEPC-1000HE and wanted to migrate everything from my default 160GB drive to the new SSD. This required resizing of the LVM prior to copying the partitions across to the SSD.&lt;/p&gt;
+&lt;p&gt;It is also very important that your logical volumes you wish to resize and migrate aren't filled with more data than the destination drive will hold!&lt;/p&gt;
+&lt;p&gt;For example my root LV (called lv_root) had 9GB in use so it was alright for me to resize and transfer to the new system.&lt;/p&gt;
+&lt;p&gt;Also, you will probably need to remove your swap LV (if your swap is configured as an LV), there will be an example of how to do that.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Required Items:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;USB Drive or Blank CDROM&lt;/li&gt;
+&lt;li&gt;liveusb-creator (if using USB method)&lt;/li&gt;
+&lt;li&gt;(Optional)Fedora LiveCD Iso&lt;/li&gt;
+&lt;li&gt;USB SATA II connector or secondary SATA port on your motherboard&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now you can create the LiveUSB or LiveCD of Fedora. Do this now!&lt;/p&gt;
+&lt;p&gt;Have all the above items? Lets get started.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;IMPORTANT&lt;/em&gt;: You need to create a full backup of data on your drive, or at least copy the important files to a safe location. Do not forget to do this, if the LVM resizing fails you will be without all your data!&lt;/p&gt;
+&lt;p&gt;So, after you backup your system you need to install the new drive.&lt;/p&gt;
+&lt;p&gt;I used a USB SATA / IDE adapter that can handle both formats in 3.5&amp;quot; and 2.5&amp;quot; sizes, it can be found on TigerDirect's website here.&lt;/p&gt;
+&lt;p&gt;My instructions are going to be for my EEEPC-1000HE so if you have any questions, leave a comment.&lt;/p&gt;
+&lt;p&gt;My guess is that if you are using a desktop system, you will need to use the SATA connection that your original drive was using for the new one and use a secondary connection for your old hard drive.&lt;/p&gt;
+&lt;p&gt;Throughout this how-to you will see &lt;strong&gt;[root&amp;#64;host ~]#&lt;/strong&gt; , this is the command prompt and yours may be different, simply enter the commands in your terminal as they appear after the prompt.&lt;/p&gt;
+&lt;div class="section" id="step-one-install-the-smaller-hard-drive-in-the-eeepc"&gt;
+&lt;h2&gt;Step One: Install the smaller hard drive in the EEEPC&lt;/h2&gt;
+&lt;p&gt;This is a pretty straightforward step, unplug your machine and remove the battery. Open up the bottom access panel and unplug and remove the old hard drive. Remove the old hard drive from the tray and replace it with the smaller drive, now you can place it back into the machine.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-two-plug-in-the-old-hard-drive-into-the-usb-to-sata-adaptor-or-another-sata-port"&gt;
+&lt;h2&gt;Step Two: Plug in the old hard drive into the USB to SATA adaptor (or another SATA port)&lt;/h2&gt;
+&lt;p&gt;This is another straightforward step, since I was using a USB adapter I had to plug in the necessary cables into my drive (they were included in the adapter kit).&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;IMPORTANT&lt;/em&gt;: Do not plug this into the computer yet if booting off a USB drive (required for EEEPC).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-three-boot-into-fedora-live-either-off-of-a-usb-or-cdrom-as-described-in-the-required-section"&gt;
+&lt;h2&gt;Step Three: Boot into Fedora Live (either off of a USB or CDROM as described in the required section).&lt;/h2&gt;
+&lt;p&gt;You may be required to set some BIOS options to allow USB booting (if using this method). In the case of my EEEPC I had to plug in the USB drive containing the Fedora Live system then access the BIOS and set the hard drive boot options to have &amp;quot;usb: removable drive&amp;quot; at the top.&lt;/p&gt;
+&lt;p&gt;Now you can start up your machine and it should boot into the Live system&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-four-if-required-plug-in-the-original-hard-drive-using-the-usb-adapter-after-live-system-has-booted"&gt;
+&lt;h2&gt;Step Four: (if required) Plug in the original hard drive using the USB adapter after Live system has booted&lt;/h2&gt;
+&lt;p&gt;This is done after booting the system to ensure that there are no conflicts with USB devices to boot off of in the BIOS.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-five-find-the-drive-names-for-your-system-to-use-in-the-migration-process"&gt;
+&lt;h2&gt;Step Five: Find the drive names for your system to use in the migration process&lt;/h2&gt;
+&lt;p&gt;You will need to make sure the drives aren't mounted anywhere, this is shown below.
+There are a few ways you can do this, but the easiest way is to fire up a terminal and become the superuser (root):&lt;/p&gt;
+&lt;p&gt;In the terminal:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[liveuser@host ~]$&lt;/span&gt; su -
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; mount
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If there is anything that shows /dev/sdb1 (old hard drive) or your volume groups (they shouldn't be mounted in a live system), unmount them with:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; umount /dev/sdb1
+&lt;span class="go"&gt;# Or for volume group&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; umount /dev/vg_yourvg-lv_yourlv
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now lets list the disks&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; fdisk -l
+&lt;span class="go"&gt;Disk /dev/sda: 60.0GB, xxxxxxxxxxxxx bytes&lt;/span&gt;
+&lt;span class="go"&gt;xxx heads, xx sectors/track, xxxxx cylinders&lt;/span&gt;
+&lt;span class="go"&gt;Units = cylinders of xxxxx * xxx = xxxxxxxx bytes&lt;/span&gt;
+&lt;span class="go"&gt;Disk identifier: xxxxxxxx&lt;/span&gt;
+
+&lt;span class="go"&gt; Disk /dev/sda doesn&amp;#39;t contain a valid partition table&lt;/span&gt;
+
+&lt;span class="go"&gt;# (this is normal if the disk is new)&lt;/span&gt;
+
+&lt;span class="go"&gt;Disk /dev/sdb: 160.0GB, xxxxxxxxxxxxxx bytes&lt;/span&gt;
+&lt;span class="go"&gt;xxx heads, xx sectors/track, xxxxx cylinders&lt;/span&gt;
+&lt;span class="go"&gt;Units = cylinders of xxxxxxx * xxx = xxxxxxxxxxxxx bytes&lt;/span&gt;
+&lt;span class="go"&gt;Disk identifier: xxxxxxxxxxxx&lt;/span&gt;
+
+&lt;span class="go"&gt;  Device  Boot   Start   End   Blocks   Id    System&lt;/span&gt;
+&lt;span class="go"&gt;/dev/sdb1  *     x       xx    xxxxxx   83   Linux&lt;/span&gt;
+&lt;span class="go"&gt;/dev/sdb2        xx      xxxxx xxxxxxxx 8e   Linux LVM&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;(It may also show a bunch of devices called /dev/dm-0, /dev/dm-1, /dev/dm-2 with messages saying &amp;quot;Disk /dev/dm-x doesn't contain a valid partition table. This is normal, just ignore these for the purposes if this post)&lt;/p&gt;
+&lt;p&gt;So our values for the rest of this howto are:
+&lt;strong&gt;New disk&lt;/strong&gt;: /dev/sda
+&lt;strong&gt;Old disk&lt;/strong&gt;: /dev/sdb&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-six-create-partition-layout-on-new-hdd"&gt;
+&lt;h2&gt;Step Six: Create partition layout on new HDD&lt;/h2&gt;
+&lt;p&gt;Since we now have the drive names, we can go ahead and partition the new disk to have the two partitions (your disk setup might be different, mine had /boot on the first partition and the LVM on the second partition).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;EDIT&lt;/strong&gt; from the future: I'm showing fdisk here, but you can do the same thing with any partition editing (I prefer parted these days)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; fdisk /dev/sda
+
+&lt;span class="go"&gt;Command (m for help): o&lt;/span&gt;
+&lt;span class="go"&gt;Building a new DOS disklabel with disk identifier xxxxxxxxxxxx&lt;/span&gt;
+&lt;span class="go"&gt;Changes will remain in memory only, until you decide to write them.&lt;/span&gt;
+&lt;span class="go"&gt;After that, of course, the previous content won&amp;#39;t be recoverable.&lt;/span&gt;
+
+&lt;span class="go"&gt;### If you get a warning about invalid flags, those are OK too.&lt;/span&gt;
+
+&lt;span class="go"&gt;Command (m for help): n&lt;/span&gt;
+&lt;span class="go"&gt;Command action&lt;/span&gt;
+&lt;span class="go"&gt;  e   extended&lt;/span&gt;
+&lt;span class="go"&gt;  p   primary partition (1-4)&lt;/span&gt;
+&lt;span class="go"&gt;p (this is my input)&lt;/span&gt;
+&lt;span class="go"&gt;Partition number (1-4): 1&lt;/span&gt;
+&lt;span class="go"&gt;First cylinder (1-xxxx, default 1): 1&lt;/span&gt;
+&lt;span class="go"&gt;### I chose 250 MB for extra kernel installs/preupgrade&lt;/span&gt;
+&lt;span class="go"&gt;Last cylinder, +cylinders or +size{K,M,G} (1-xxx, default xxx): +250M&lt;/span&gt;
+
+&lt;span class="go"&gt;Command (m for help): n&lt;/span&gt;
+&lt;span class="go"&gt;Command action&lt;/span&gt;
+&lt;span class="go"&gt;   e    extended&lt;/span&gt;
+&lt;span class="go"&gt;   p    primary partition (1-4)&lt;/span&gt;
+&lt;span class="go"&gt;p&lt;/span&gt;
+&lt;span class="go"&gt;Partition number (1-4): 2&lt;/span&gt;
+&lt;span class="go"&gt;### Pressing enter through these should make it the rest of the disk&lt;/span&gt;
+&lt;span class="go"&gt;First cylinder (xx-xxxx, default xxx): &amp;lt;press enter&amp;gt;&lt;/span&gt;
+&lt;span class="go"&gt;Using default value xxx&lt;/span&gt;
+&lt;span class="go"&gt;Last cylinder, +cylinders or +size{K,M,G} (xx-xxxx, default xxxx): &amp;lt;press enter&amp;gt;&lt;/span&gt;
+&lt;span class="go"&gt;Using default value xxxx&lt;/span&gt;
+
+&lt;span class="go"&gt;Command (m for help): t&lt;/span&gt;
+&lt;span class="go"&gt;Partition number (1-4): 2&lt;/span&gt;
+&lt;span class="go"&gt;Hex code (type L to list codes): 8e&lt;/span&gt;
+&lt;span class="go"&gt;Changed system partition 2 to 8e (Linux LVM)&lt;/span&gt;
+
+&lt;span class="go"&gt;Command (m for help): w&lt;/span&gt;
+&lt;span class="go"&gt;The partition table has been altered!&lt;/span&gt;
+
+&lt;span class="go"&gt;Calling ioctl() to re-read partition table.&lt;/span&gt;
+&lt;span class="go"&gt;Syncing disks.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Your partitions are now ready for some data!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-seven-copy-the-boot-partition-from-the-old-drive-to-the-new-drive-and-resize-it"&gt;
+&lt;h2&gt;Step Seven: Copy the boot partition from the old drive to the new drive and resize it&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; e2fsck -f /dev/sdb1
+&lt;span class="go"&gt;&amp;lt;Output of e2fsck snipped&amp;gt;&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; dd &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/dev/sdb1 &lt;span class="nv"&gt;of&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/dev/sda1
+&lt;span class="go"&gt;&amp;lt;Output of dd snipped&amp;gt;&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; e2fsck -f /dev/sda1
+&lt;span class="go"&gt;&amp;lt;Output of e2fsck snipped&amp;gt;&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; resize2fs /dev/sda1
+&lt;span class="go"&gt;&amp;lt;Output of resize2fs snipped&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The resize2fs output should say that it successfully resized the filesystem to a certain amount of blocks.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-eight-gather-information-on-your-lvm-structure"&gt;
+&lt;h2&gt;Step Eight: Gather information on your LVM structure&lt;/h2&gt;
+&lt;p&gt;For this step, you need to make note of what your logical volumes, volume groups, and physical volumes are called.&lt;/p&gt;
+&lt;p&gt;In this how to mine are as follows:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;strong&gt;Root&lt;/strong&gt;: lv_root&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Swap&lt;/strong&gt;: lv_swap&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Volume Group&lt;/strong&gt;: vg_taitsstuff&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The columns shown below are the only ones you should be concerned with.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; lvs
+&lt;span class="go"&gt;LV            VG                  LSize&lt;/span&gt;
+&lt;span class="go"&gt;lv_root     vg_taitsstuff      144.xxG&lt;/span&gt;
+&lt;span class="go"&gt;lv_swap     vg_taitsstuff      4.xG&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;So this shows my current logical volume setup where:&lt;/p&gt;
+&lt;p&gt;lv_root is located on vg_taitsstuff and is 144.xxG in size
+lv_swap is located on vg_taitstuff and is 4.xG in size&lt;/p&gt;
+&lt;p&gt;Now we can look at the information for the volume groups:&lt;/p&gt;
+&lt;p&gt;The columns that have been omitted are unimportant at this point.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; vgs
+&lt;span class="go"&gt;VG              #PV  #LV  #SN  VSize VFree&lt;/span&gt;
+&lt;span class="go"&gt;vg_taitsstuff  1        2      0    148.xxG   0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This means that:&lt;/p&gt;
+&lt;p&gt;vg_taitstuff is 148.xxG in size with no free space located on ONE physical volume and contains TWO logical volumes.&lt;/p&gt;
+&lt;p&gt;So finally lets take a look at the physical volumes:
+Again, the omitted columns aren't important to us right now.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; pvs
+&lt;span class="go"&gt;PV             VG               PSize    PFree&lt;/span&gt;
+&lt;span class="go"&gt;/dev/sdb2  vg_taitsstuff   148.xxG    0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;So this means that the only LVM physical volume I have is on /dev/sdb2  and is the same size as the volume group (since it is the only one there).&lt;/p&gt;
+&lt;p&gt;The things you need to remember are:
+The name of the swap logical volume (mine: lv_swap)
+The name of the physical volume (mine: /dev/sdb2)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-nine-remove-swap-logical-volume"&gt;
+&lt;h2&gt;Step Nine: Remove SWAP logical volume&lt;/h2&gt;
+&lt;p&gt;I was having issues with resizing due to the placement of my SWAP logical volume, so what I did was remove it (it will be recreated later with the information from the above section).&lt;/p&gt;
+&lt;p&gt;So, lets turn the swap off and remove it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; swapoff -v /dev/vg_taitsstuff/lv_swap
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; lvremove /dev/vg_taitsstuff/lv_swap
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-ten-resize-root-logical-volume"&gt;
+&lt;h2&gt;Step Ten: Resize ROOT logical volume&lt;/h2&gt;
+&lt;p&gt;Since I have only one logical volume for my system (other than the swap we just deleted) this is relatively straightforward, if you have multiple partitions I am not able to help you at the moment.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; e2fsck -f /dev/vg_taitsstuff/lv_root
+&lt;span class="go"&gt;# 50G was chosen so it was smaller than the size of the HDD, noobish I know.&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; resize2fs -p /dev/vg_taittstuff/lv_root 50G
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; lvreduce --size 50G vg_taitsstuff/lv_root --test
+&lt;span class="go"&gt;# If there were any errors in the test, do not issue the next command&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; lvreduce --size 50G vg_taitsstuff/lv_root
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-eleven-resize-the-physical-volume"&gt;
+&lt;h2&gt;Step Eleven: Resize the physical volume&lt;/h2&gt;
+&lt;p&gt;Now we can resize the volume so it will fit in our new partition on the new disk.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; pvresize --setphysicalvolumesize 55G /dev/sdb2
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This should complete successfully. The reason why I chose 55G was that it was greater than the filesystem size we set in Step 10 and less than the new hard drive size (60 GB)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-twelve-copy-the-old-partition-to-the-new-drive"&gt;
+&lt;h2&gt;Step Twelve: Copy the old partition to the new drive&lt;/h2&gt;
+&lt;p&gt;Some people may argue that I am taking a round about way to do this, I did it this way because it made sense at the time. I tried migrating the volume groups without success so I did it this way.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; dd &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/dev/sdb2 &lt;span class="nv"&gt;of&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/dev/sda2
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This will take a while depending on the size, also it may tell you that it ran out of space, this should be alright because it will already be finished writing the physical volume that we resized in the previous step.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-thirteen-physically-disconnect-the-old-drive"&gt;
+&lt;h2&gt;Step Thirteen: Physically disconnect the old drive&lt;/h2&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-fourteen-resize-the-pv-on-the-new-drive"&gt;
+&lt;h2&gt;Step Fourteen: Resize the PV on the new drive&lt;/h2&gt;
+&lt;p&gt;This step is so we can get full use of our LVM partition.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; pvresize /dev/sda2
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-fifteen-resize-the-logical-volume-and-filesystem-on-the-new-drive-and-create-the-new-swap-logical-volume"&gt;
+&lt;h2&gt;Step Fifteen: Resize the logical volume and filesystem on the new drive and create the new swap logical volume&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; lvextend /dev/vg_taitsstuff/lv_root /dev/sda2
+&lt;span class="go"&gt;# 4GB here is the size of the swap partition I want&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; lvreduce --size -4G vg_taitsstuff/lv_root
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; lvcreate --name lv_swap vg_taitsstuff
+&lt;span class="go"&gt;# There are a lot of these filesystem checks, some may say too many, but lets be safe&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; e2fsck -f /dev/vg_taitsstuff/lv_root
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; resize2fs /dev/vg_taitsstuff/lv_root
+&lt;span class="go"&gt;# Lets bring back that swap LV&lt;/span&gt;
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; mkswap /dev/vg_taitsstuff/lv_swap
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-seventeen-reinstall-grub-on-the-new-drive"&gt;
+&lt;h2&gt;Step Seventeen: Reinstall GRUB on the new drive&lt;/h2&gt;
+&lt;p&gt;We need to activate the vg, mount the partitions, and reinstall grub.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; mkdir -p /mnt/temp/boot
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; vgchange -a y
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; mount /dev/sda1 /mnt/temp/boot
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; mount /dev/vg_taitsstuff/lv_root /mnt/temp
+&lt;span class="gp"&gt;[root@host ~]#&lt;/span&gt; grub-install --root-directory&lt;span class="o"&gt;=&lt;/span&gt;/mnt/temp /dev/sda
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-eighteen-reboot"&gt;
+&lt;h2&gt;Step Eighteen: Reboot&lt;/h2&gt;
+&lt;p&gt;Now that everything has reinstalled and been resized, it is time for a reboot! If your grub menu is just a prompt, not to worry.&lt;/p&gt;
+&lt;p&gt;Just enter the following commands in the grub prompt (grub&amp;gt;)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="go"&gt;grub&amp;gt; kernel /vmlinuz-2.6.rest.of.your.kernel.version&lt;/span&gt;
+&lt;span class="go"&gt;grub&amp;gt; initrd /initrd-2.6.same.as.above&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you do not know the kernel version off hand, you can press tab twice after entering kernel and a forward slash and it will show the available versions. The same goes for the ramdisk (initrd), just make sure that the ramdisk version and the kernel version are the same.&lt;/p&gt;
+&lt;p&gt;Once you login to your system just run &amp;quot;grub-install /dev/sda&amp;quot; as root and things should be back to normal.&lt;/p&gt;
+&lt;p&gt;Remember. MAKE SURE YOU HAVE BACKED UP EVERYTHING. My instructions may not work for your setup so you should have a full backup (I did a &amp;quot;dd&amp;quot; of my entire disk to a file before I started resizing to an external hard drive while booted from a Live USB).&lt;/p&gt;
+&lt;/div&gt;
+</summary><category term="lvm"></category><category term="linux"></category></entry></feed>

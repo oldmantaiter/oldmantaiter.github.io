@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>iptables - Route Traffic from Specific Interface to a Specific Gateway // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Thu 29 October 2009</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>iptables - Route Traffic from Specific Interface to a Specific Gateway</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/iptables.html">iptables</a>
+                                <a class="post-category" href="../../../tag/firewall.html">firewall</a>
+                                <a class="post-category" href="../../../tag/linux.html">linux</a>
+                        </p>
+                </header>
+            </section>
+            <p>Recently I set up Openfire as a corporate messaging service, the problem I ran into was that since our VPN server and Openfire server both have external access and are in the same address space, the VPN server would try to send the Openfire traffic out the external gateway but couldn't reach the server because of some ACLs that were set in place.</p>
+<p>So what I did was take the traffic from the VPN tunnel that is going to the Openfire ports and route it through our internal network.</p>
+<p>What you will need to do is create another route table and mark the desired packets with iptables.</p>
+<p>First you should pick a table number to create, I picked table #300. I made sure that the table did not exist before creating it by doing the following:</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> ip route show table 300
+</pre></div>
+<p>This shouldn't return any information, if it does you must select a new one as it already contains routing data and overwriting it will most likely cause some issues.</p>
+<p>Now that we know that the table doesn't exist, we are going to clear it anyways to make sure that it is clean.</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> ip route flush table 300
+</pre></div>
+<p>You may or may not get a message telling you that there was nothing to flush or it doesn't exist.</p>
+<p>Next we have to pick a number to have iptables mark the packets with. I chose the number 85 because in one of my previous posts I had used 80 to do some custom routing.</p>
+<p>To set an ip rule we need to figure out the hex value of the number above. The easiest way to do this is in a calculator that can display hex and decimal values. In GNOME you can select the calculator from Applications &gt; Accessories &gt; Calculator, then select View &gt; Programming. To make the conversion, make sure that the &quot;Dec&quot; radio button is selected and type in the number you want (eg. 85). Now click the &quot;Hex&quot; radio button and it will give you the hex value. 85 becomes 55 so our rule will use 0x55 as the hex value. As I don't have a great understanding of hex, I am not sure if larger numbers would mean that the &quot;0x&quot; part preceding the hex value from the calculator would change.</p>
+<p>Now we should check to make sure that no ip rule exists for our hex value.</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> ip rule
+</pre></div>
+<p>This will show all the rules that are active, if there is an entry that has 0x55 in it, pick another number.</p>
+<p>Next, flush the rule to make it clean for us to use.</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> ip rule del fwmark 0x55
+</pre></div>
+<p>You will probably get a message that states &quot;RTNETLINK answers: No such file or directory&quot;, this is a good thing and means that it really does not exist.</p>
+<p>So now we are ready to start creating the iptables rules, I do these first but you can do them after creating the routing rules if you would like (those will follow this section).</p>
+<p>Our Openfire installation uses a custom port, but I will show this with the default ports (tcp ports 5222 and 5223). This will work for any port you would like. Our OpenVPN setup uses tun0 as the tunnel adaptor so that is the interface we wish to forward packets from.</p>
+<p>We are going to use the PREROUTING table as we need to mark the packets before they get routed.</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5222
+<span class="gp">[root@tclarrltp ~]#</span> iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5223
+</pre></div>
+<p>As you can see, the --set-mark flag value is our number that we picked in a previous section. It correlates to the fwmark 0x55 rule that we will be creating (because they are equal values, just one is decimal and the other is hex).</p>
+<p>The -i flag is the interface we want iptables to mark packets from.</p>
+<p>The -p flag is for the protocol (tcp/udp) and the -dport flag is the destination port of the packets.</p>
+<p>This basically means that any traffic coming through tun0 heading for tcp port 5222 or 5223 will get marked with the number 85.</p>
+<p>So now we can set the routing rules to deal with the marked packets.</p>
+<p>First we are going to set the default route for table 300 so all our marked packets will go through there. I am going to use 192.168.0.1 as the gateway.</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> ip route add table 300 default via 192.168.0.1
+<span class="go"># Now tell the rule which table to look up</span>
+<span class="gp">[root@tclarrltp ~]#</span> ip rule add fwmark 0x55 table 300
+</pre></div>
+<p>Remember that unless you make the rule persistent or have a script start on boot with these commands, the routing will not be there when you restart your machine.</p>
+<p>A simple script would look like the following:</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+ip route flush table 300
+ip rule del fwmark 0x55
+iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5222
+iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5223
+ip route add table 300 default via 192.168.0.1
+ip rule add fwmark 0x55 table 300
+</pre></div>
+<p>If you have any questions, feel free to leave me a comment or send me an email.</p>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>
