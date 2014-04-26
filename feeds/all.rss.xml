@@ -1,4 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>tait.clarridge</title><link>http://oldmantaiter.github.io/</link><description></description><atom:link href="http://oldmantaiter.github.io/feeds/all.rss.xml" rel="self"></atom:link><lastBuildDate>Fri, 25 Apr 2014 18:52:00 -0400</lastBuildDate><item><title>Posts Incoming</title><link>http://oldmantaiter.github.io/posts/2014/04/posts-incoming.html</link><description>&lt;p&gt;Well, it is time for me to embrace github and stop using a hosted environment for my tiny tech blog.&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>tait.clarridge</title><link>http://oldmantaiter.github.io/</link><description></description><atom:link href="http://oldmantaiter.github.io/feeds/all.rss.xml" rel="self"></atom:link><lastBuildDate>Fri, 25 Apr 2014 18:52:00 -0400</lastBuildDate><item><title>Posts Incoming</title><link>http://oldmantaiter.github.io/techlog/2014/04/posts-incoming.html</link><description>&lt;p&gt;Well, it is time for me to embrace github and stop using a hosted environment for my tiny tech blog.&lt;/p&gt;
 &lt;p&gt;Over the coming days I will be porting the necessary things over and adding new thoughts and ideas.&lt;/p&gt;
-</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Tait Clarridge</dc:creator><pubDate>Fri, 25 Apr 2014 18:52:00 -0400</pubDate><guid>tag:oldmantaiter.github.io,2014-04-25:posts/2014/04/posts-incoming.html</guid><category>incoming</category><category>new</category></item></channel></rss>
+</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Tait Clarridge</dc:creator><pubDate>Fri, 25 Apr 2014 18:52:00 -0400</pubDate><guid>tag:oldmantaiter.github.io,2014-04-25:techlog/2014/04/posts-incoming.html</guid><category>incoming</category><category>new</category></item><item><title>FTP Load-Balanced through haproxy</title><link>http://oldmantaiter.github.io/techlog/2012/09/ftp-load-balanced-through-haproxy.html</link><description>&lt;p&gt;I was asked to explore the possibility of having haproxy balance connections between multiple backend FTP servers. Luckily there is a way to do this without having to play with DNAT on the proxy server and instead setting it up with multiple backends in haproxy.&lt;/p&gt;
+&lt;p&gt;First you will need to setup a few FTP servers. I chose VSFTP (which can be installed on CentOS via &amp;quot;yum install vsftpd&amp;quot;)&lt;/p&gt;
+&lt;p&gt;As far as I know, this will only work properly with ftp passive mode. For that you can make the following vsftpd config&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[tait@foxtrot-tango-papa01 ~]$&lt;/span&gt; cat /etc/vsftpd/vsftpd.conf
+&lt;span class="go"&gt;anonymous_enable=NO&lt;/span&gt;
+&lt;span class="go"&gt;local_enable=YES&lt;/span&gt;
+&lt;span class="go"&gt;write_enable=YES&lt;/span&gt;
+&lt;span class="go"&gt;local_umask=022&lt;/span&gt;
+&lt;span class="go"&gt;dirmessage_enable=YES&lt;/span&gt;
+&lt;span class="go"&gt;xferlog_enable=YES&lt;/span&gt;
+&lt;span class="go"&gt;connect_from_port_20=NO&lt;/span&gt;
+&lt;span class="go"&gt;xferlog_file=/var/log/xferlog&lt;/span&gt;
+&lt;span class="go"&gt;xferlog_std_format=YES&lt;/span&gt;
+&lt;span class="go"&gt;pam_service_name=vsftpd&lt;/span&gt;
+
+&lt;span class="go"&gt;# This is a user whitelist we use&lt;/span&gt;
+&lt;span class="go"&gt;userlist_enable=YES&lt;/span&gt;
+&lt;span class="go"&gt;userlist_deny=NO&lt;/span&gt;
+&lt;span class="go"&gt;userlist_file=/etc/vsftpd/user_list&lt;/span&gt;
+&lt;span class="go"&gt;tcp_wrappers=YES&lt;/span&gt;
+&lt;span class="go"&gt;pasv_enable=YES&lt;/span&gt;
+&lt;span class="go"&gt;pasv_promiscuous=NO&lt;/span&gt;
+&lt;span class="go"&gt;port_enable=YES&lt;/span&gt;
+&lt;span class="go"&gt;port_promiscious=NO&lt;/span&gt;
+
+&lt;span class="go"&gt;# Added listen address for internal only&lt;/span&gt;
+&lt;span class="go"&gt;listen=YES&lt;/span&gt;
+&lt;span class="go"&gt;# If you use this method, change the listen_address for each server (duh)&lt;/span&gt;
+&lt;span class="go"&gt;listen_address=10.0.0.10&lt;/span&gt;
+
+&lt;span class="go"&gt;# These are the ports to use for PASV mode&lt;/span&gt;
+&lt;span class="go"&gt;# It is important that these port numbers are unique across each of your backend servers&lt;/span&gt;
+&lt;span class="go"&gt;pasv_min_port=10000&lt;/span&gt;
+&lt;span class="go"&gt;pasv_max_port=10250&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;So basically for each server you should be creating a new port range to use with passive ftp.
+My configuration has the following:&lt;/p&gt;
+&lt;p&gt;foxtrot-tango-papa01: 10001 -&amp;gt; 10250
+foxtrot-tango-papa02: 10251 -&amp;gt; 10500
+foxtrot-tango-papa03: 10501 -&amp;gt; 10750&lt;/p&gt;
+&lt;p&gt;Ensure that your configuration works on each node and try sample ftp connections to each of your servers before we proceed to configuring and using haproxy for the frontend.&lt;/p&gt;
+&lt;p&gt;Download and install haproxy, you can either do this by source or through a 3rd party repository.&lt;/p&gt;
+&lt;p&gt;This is what my config (very basic) looks like.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[tait@ftp-proxy01]$&lt;/span&gt; cat /etc/haproxy/haproxy.cfg
+&lt;span class="go"&gt;# HAPROXY Config for FTP&lt;/span&gt;
+&lt;span class="go"&gt;# my apologies for the spacing&lt;/span&gt;
+&lt;span class="go"&gt;global&lt;/span&gt;
+&lt;span class="go"&gt;    log 127.0.0.1 local0 info&lt;/span&gt;
+&lt;span class="go"&gt;    chroot /var/lib/haproxy&lt;/span&gt;
+&lt;span class="go"&gt;    user haproxy&lt;/span&gt;
+&lt;span class="go"&gt;    group haproxy&lt;/span&gt;
+&lt;span class="go"&gt;    maxconn 2000&lt;/span&gt;
+
+&lt;span class="go"&gt;defaults&lt;/span&gt;
+&lt;span class="go"&gt;    log global&lt;/span&gt;
+&lt;span class="go"&gt;    mode tcp&lt;/span&gt;
+&lt;span class="go"&gt;    option tcplog&lt;/span&gt;
+&lt;span class="go"&gt;    retries 3&lt;/span&gt;
+
+&lt;span class="go"&gt;# This is for the initial connection and control traffic&lt;/span&gt;
+&lt;span class="go"&gt;frontend foxtrot-tango-papa-control&lt;/span&gt;
+&lt;span class="go"&gt;    bind *:21&lt;/span&gt;
+&lt;span class="go"&gt;    default_backend ftp_server_pool&lt;/span&gt;
+
+&lt;span class="go"&gt;# Each of these frontends represent a server and its corresponding PASV ports we set&lt;/span&gt;
+&lt;span class="go"&gt;frontend foxtrot-tango-papa01&lt;/span&gt;
+&lt;span class="go"&gt;    bind *:10001-10250&lt;/span&gt;
+&lt;span class="go"&gt;    default_backend foxtrot_tango_papa01&lt;/span&gt;
+
+&lt;span class="go"&gt;frontend foxtrot-tango-papa02&lt;/span&gt;
+&lt;span class="go"&gt;    bind *:10251-10500&lt;/span&gt;
+&lt;span class="go"&gt;    default_backend foxtrot_tango_papa02&lt;/span&gt;
+
+&lt;span class="go"&gt;frontend foxtrot-tango-papa03&lt;/span&gt;
+&lt;span class="go"&gt;    bind *:10501-10750&lt;/span&gt;
+&lt;span class="go"&gt;    default_backend foxtrot_tango_papa03&lt;/span&gt;
+
+&lt;span class="go"&gt;# Global backend for the ftp control traffic to find a server&lt;/span&gt;
+&lt;span class="go"&gt;backend ftp_server_pool&lt;/span&gt;
+&lt;span class="go"&gt;    server foxtrot-tango-papa01 10.0.0.10 check port 21 inter 10s rise 1 fall 2&lt;/span&gt;
+&lt;span class="go"&gt;    server foxtrot-tango-papa02 10.0.0.11 check port 21 inter 10s rise 1 fall 2&lt;/span&gt;
+&lt;span class="go"&gt;    server foxtrot-tango-papa03 10.0.0.12 check port 21 inter 10s rise 1 fall 2&lt;/span&gt;
+
+&lt;span class="go"&gt;# Backends for each of our FTP servers&lt;/span&gt;
+&lt;span class="go"&gt;backend foxtrot_tango_papa01&lt;/span&gt;
+&lt;span class="go"&gt;    server foxtrot-tango-papa01 10.0.0.10 check port 21 inter 10s rise 1 fall 2&lt;/span&gt;
+
+&lt;span class="go"&gt;backend foxtrot_tango_papa02&lt;/span&gt;
+&lt;span class="go"&gt;    server foxtrot-tango-papa02 10.0.0.11 check port 21 inter 10s rise 1 fall 2&lt;/span&gt;
+
+&lt;span class="go"&gt;backend foxtrot_tango_papa03&lt;/span&gt;
+&lt;span class="go"&gt;    server foxtrot-tango-papa03 10.0.0.12 check port 21 inter 10s rise 1 fall 2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now you should be able to start haproxy (ignore warnings or take care of them as you need to... like I said, very basic config) and ftp to it.&lt;/p&gt;
+&lt;p&gt;Be warned, this configuration makes haproxy bind to EVERY passive port listed, but you should be able to ftp to the haproxy IP and transfer files to and from your FTP server pool.&lt;/p&gt;
+&lt;p&gt;Leave a comment if you require any help, but as a basic config this should work.&lt;/p&gt;
+</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Tait Clarridge</dc:creator><pubDate>Fri, 14 Sep 2012 11:47:00 -0400</pubDate><guid>tag:oldmantaiter.github.io,2012-09-14:techlog/2012/09/ftp-load-balanced-through-haproxy.html</guid><category>haproxy</category><category>ftp</category></item></channel></rss>

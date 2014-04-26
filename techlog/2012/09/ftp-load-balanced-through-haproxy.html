@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>FTP Load-Balanced through haproxy // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Fri 14 September 2012</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>FTP Load-Balanced through haproxy</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/haproxy.html">haproxy</a>
+                                <a class="post-category" href="../../../tag/ftp.html">ftp</a>
+                        </p>
+                </header>
+            </section>
+            <p>I was asked to explore the possibility of having haproxy balance connections between multiple backend FTP servers. Luckily there is a way to do this without having to play with DNAT on the proxy server and instead setting it up with multiple backends in haproxy.</p>
+<p>First you will need to setup a few FTP servers. I chose VSFTP (which can be installed on CentOS via &quot;yum install vsftpd&quot;)</p>
+<p>As far as I know, this will only work properly with ftp passive mode. For that you can make the following vsftpd config</p>
+<div class="highlight"><pre><span class="gp">[tait@foxtrot-tango-papa01 ~]$</span> cat /etc/vsftpd/vsftpd.conf
+<span class="go">anonymous_enable=NO</span>
+<span class="go">local_enable=YES</span>
+<span class="go">write_enable=YES</span>
+<span class="go">local_umask=022</span>
+<span class="go">dirmessage_enable=YES</span>
+<span class="go">xferlog_enable=YES</span>
+<span class="go">connect_from_port_20=NO</span>
+<span class="go">xferlog_file=/var/log/xferlog</span>
+<span class="go">xferlog_std_format=YES</span>
+<span class="go">pam_service_name=vsftpd</span>
+
+<span class="go"># This is a user whitelist we use</span>
+<span class="go">userlist_enable=YES</span>
+<span class="go">userlist_deny=NO</span>
+<span class="go">userlist_file=/etc/vsftpd/user_list</span>
+<span class="go">tcp_wrappers=YES</span>
+<span class="go">pasv_enable=YES</span>
+<span class="go">pasv_promiscuous=NO</span>
+<span class="go">port_enable=YES</span>
+<span class="go">port_promiscious=NO</span>
+
+<span class="go"># Added listen address for internal only</span>
+<span class="go">listen=YES</span>
+<span class="go"># If you use this method, change the listen_address for each server (duh)</span>
+<span class="go">listen_address=10.0.0.10</span>
+
+<span class="go"># These are the ports to use for PASV mode</span>
+<span class="go"># It is important that these port numbers are unique across each of your backend servers</span>
+<span class="go">pasv_min_port=10000</span>
+<span class="go">pasv_max_port=10250</span>
+</pre></div>
+<p>So basically for each server you should be creating a new port range to use with passive ftp.
+My configuration has the following:</p>
+<p>foxtrot-tango-papa01: 10001 -&gt; 10250
+foxtrot-tango-papa02: 10251 -&gt; 10500
+foxtrot-tango-papa03: 10501 -&gt; 10750</p>
+<p>Ensure that your configuration works on each node and try sample ftp connections to each of your servers before we proceed to configuring and using haproxy for the frontend.</p>
+<p>Download and install haproxy, you can either do this by source or through a 3rd party repository.</p>
+<p>This is what my config (very basic) looks like.</p>
+<div class="highlight"><pre><span class="gp">[tait@ftp-proxy01]$</span> cat /etc/haproxy/haproxy.cfg
+<span class="go"># HAPROXY Config for FTP</span>
+<span class="go"># my apologies for the spacing</span>
+<span class="go">global</span>
+<span class="go">    log 127.0.0.1 local0 info</span>
+<span class="go">    chroot /var/lib/haproxy</span>
+<span class="go">    user haproxy</span>
+<span class="go">    group haproxy</span>
+<span class="go">    maxconn 2000</span>
+
+<span class="go">defaults</span>
+<span class="go">    log global</span>
+<span class="go">    mode tcp</span>
+<span class="go">    option tcplog</span>
+<span class="go">    retries 3</span>
+
+<span class="go"># This is for the initial connection and control traffic</span>
+<span class="go">frontend foxtrot-tango-papa-control</span>
+<span class="go">    bind *:21</span>
+<span class="go">    default_backend ftp_server_pool</span>
+
+<span class="go"># Each of these frontends represent a server and its corresponding PASV ports we set</span>
+<span class="go">frontend foxtrot-tango-papa01</span>
+<span class="go">    bind *:10001-10250</span>
+<span class="go">    default_backend foxtrot_tango_papa01</span>
+
+<span class="go">frontend foxtrot-tango-papa02</span>
+<span class="go">    bind *:10251-10500</span>
+<span class="go">    default_backend foxtrot_tango_papa02</span>
+
+<span class="go">frontend foxtrot-tango-papa03</span>
+<span class="go">    bind *:10501-10750</span>
+<span class="go">    default_backend foxtrot_tango_papa03</span>
+
+<span class="go"># Global backend for the ftp control traffic to find a server</span>
+<span class="go">backend ftp_server_pool</span>
+<span class="go">    server foxtrot-tango-papa01 10.0.0.10 check port 21 inter 10s rise 1 fall 2</span>
+<span class="go">    server foxtrot-tango-papa02 10.0.0.11 check port 21 inter 10s rise 1 fall 2</span>
+<span class="go">    server foxtrot-tango-papa03 10.0.0.12 check port 21 inter 10s rise 1 fall 2</span>
+
+<span class="go"># Backends for each of our FTP servers</span>
+<span class="go">backend foxtrot_tango_papa01</span>
+<span class="go">    server foxtrot-tango-papa01 10.0.0.10 check port 21 inter 10s rise 1 fall 2</span>
+
+<span class="go">backend foxtrot_tango_papa02</span>
+<span class="go">    server foxtrot-tango-papa02 10.0.0.11 check port 21 inter 10s rise 1 fall 2</span>
+
+<span class="go">backend foxtrot_tango_papa03</span>
+<span class="go">    server foxtrot-tango-papa03 10.0.0.12 check port 21 inter 10s rise 1 fall 2</span>
+</pre></div>
+<p>Now you should be able to start haproxy (ignore warnings or take care of them as you need to... like I said, very basic config) and ftp to it.</p>
+<p>Be warned, this configuration makes haproxy bind to EVERY passive port listed, but you should be able to ftp to the haproxy IP and transfer files to and from your FTP server pool.</p>
+<p>Leave a comment if you require any help, but as a basic config this should work.</p>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>
