@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>OpenIndiana (Solaris) VLAN Trunk // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Thu 22 March 2012</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>OpenIndiana (Solaris) VLAN Trunk</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/vlan.html">vlan</a>
+                                <a class="post-category" href="../../../tag/networking.html">networking</a>
+                        </p>
+                </header>
+            </section>
+            <p>I recently discovered a need to be able to add multiple VLANs on a single interfaces on Solaris.</p>
+<p>This one is really simple! Just make sure you are running as root, not escalating privileges with pfexec.</p>
+<p>So, lets start this off. Figure out which of your interfaces you want to use as the trunk, in my case it is atge0.
+Make sure that you have setup whichever switchport on your switch to be a dot1q trunk</p>
+<p>In this scenario I have my server originally on a switchport just in access mode on VLAN 10. To make it into a trunk (network will drop for around 30 seconds) you can reconfigure the port with the commands below to still be on VLAN 10 if using Cisco.</p>
+<div class="highlight"><pre><span class="go">taiter-sw# configure terminal</span>
+<span class="go">Enter configuration commands, one per line. End with CNTL/Z.</span>
+<span class="go">taiter-sw(config)# interface gi0/5</span>
+<span class="go">taiter-sw(config-if)# switchport</span>
+<span class="go">taiter-sw(config-if)# switchport trunk encapsulation dot1q</span>
+<span class="go">taiter-sw(config-if)# switchport trunk native vlan 10</span>
+<span class="go">taiter-sw(config-if)# switchport mode trunk</span>
+<span class="go">taiter-sw(config-if)# end</span>
+</pre></div>
+<p>Then issue the following commands (substituting your NIC for where I've put atge0):</p>
+<div class="highlight"><pre><span class="gp">root@taiter:~#</span> dladm create-vnic -l atge0 -v 30 atge0.30
+</pre></div>
+<p>The argument for the VLAN is -v VLANID and then you can call your new virtual interface whatever you like. I tend to like the INTERFACE.VLAN naming.</p>
+<p>Now we can give an IP to the new VNIC.</p>
+<div class="highlight"><pre><span class="gp">root@taiter:~#</span> ifconfig atge0.30 plumb 10.1.1.5/24 up
+</pre></div>
+<p>I've just shown an example, but obviously change 10.1.1.5/24 to your IP and mask that is on that VLAN.</p>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>

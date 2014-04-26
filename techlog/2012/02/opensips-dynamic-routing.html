@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>OpenSIPS Dynamic Routing // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Thu 09 February 2012</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>OpenSIPS Dynamic Routing</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/opensips.html">opensips</a>
+                                <a class="post-category" href="../../../tag/voip.html">voip</a>
+                        </p>
+                </header>
+            </section>
+            <p>I've been playing with OpenSIPS and Freeswitch recently and was intrigued by the Dynamic Routing [drouting] module for call routing.</p>
+<p>Although I don't have a full grip on all the features that are available in this module, basic functionality is still pretty useful.</p>
+<p>I basically wanted to be able to route specific DIDs to certain Freeswitch servers and have a list of carriers with failover for outbound calls.</p>
+<p>So lets get started, I'm assuming you already have a mysql database setup for opensips and have granted access to it to a user.</p>
+<p>Lets setup the database:</p>
+<p>There are 4 tables involved in dynamic routing:</p>
+<ul class="simple">
+<li><strong>dr_groups</strong>: This is where you call dynamic routing from the configuration files (I will explain later)</li>
+<li><strong>dr_gateways</strong>: These are your route endpoints, so for us it was our freeswitch servers</li>
+<li><strong>dr_gw_lists</strong>: These are list entries that combine the entries in dr_gateways and allow for failover</li>
+<li><strong>dr_rules</strong>: In here you put in the rules for inbound DIDs or default routes</li>
+</ul>
+<p>To setup the dr_groups I chose to create two separate groups for inbound and outbound calling to help split up the dial plans. Connect to your opensips mysql instance and change to your opensips database.</p>
+<div class="highlight"><pre><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">use</span> <span class="n">opensips</span><span class="p">;</span>
+<span class="n">Reading</span> <span class="k">table</span> <span class="n">information</span> <span class="k">for</span> <span class="n">completion</span> <span class="n">of</span> <span class="k">table</span> <span class="k">and</span> <span class="k">column</span> <span class="n">names</span>
+<span class="n">You</span> <span class="n">can</span> <span class="n">turn</span> <span class="n">off</span> <span class="n">this</span> <span class="n">feature</span> <span class="k">to</span> <span class="n">get</span> <span class="n">a</span> <span class="n">quicker</span> <span class="n">startup</span> <span class="k">with</span> <span class="o">-</span><span class="n">A</span>
+
+<span class="k">Database</span> <span class="n">changed</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">INSERT</span> <span class="k">INTO</span> <span class="nf">dr_groups</span><span class="p">(</span><span class="n">username</span><span class="p">,</span><span class="n">domain</span><span class="p">,</span><span class="n">groupid</span><span class="p">,</span><span class="n">description</span><span class="p">)</span> <span class="k">VALUES</span><span class="p">(</span><span class="s2">&quot;.*&quot;</span><span class="p">,</span><span class="s2">&quot;.*&quot;</span><span class="p">,</span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="s2">&quot;INBOUND&quot;</span><span class="p">);</span>
+</pre></div>
+<p>Since it didn't really matter about the domains and usernames, I set them as wildcard values. The important part is the groupid, it is how we are going to call our dynamic routes. I set the description to INBOUND because that is what I am going to do for my inbound calling routes.</p>
+<p>Into the dr_gateways table we can put the gateways that we will use.</p>
+<div class="highlight"><pre><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">INSERT</span> <span class="k">INTO</span> <span class="nf">dr_gateways</span><span class="p">(</span><span class="n">type</span><span class="p">,</span><span class="n">address</span><span class="p">,</span><span class="n">strip</span><span class="p">,</span><span class="n">probe_mode</span><span class="p">,</span><span class="n">description</span><span class="p">)</span> <span class="k">VALUES</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="s2">&quot;GW_IP:PORT&quot;</span><span class="p">,</span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="s2">&quot;2&quot;</span><span class="p">,</span><span class="s2">&quot;Freeswitch&quot;</span><span class="p">);</span>
+</pre></div>
+<p>I don't think the type matters right now. And the GW_IP:GW_PORT is the IP of your endpoint, in my case it was the freeswitch. The &quot;strip&quot; column is how many digits you want to strip before passing it on. The &quot;probe_mode&quot; is important if you want failover when using dr_gw_lists. Setting it to 2 enables probing so it will keep a list of which gateways are still active.</p>
+<p>You can decide to setup dr_gw_lists if you would like to.</p>
+<div class="highlight"><pre><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">INSERT</span> <span class="k">INTO</span> <span class="nf">dr_gw_lists</span><span class="p">(</span><span class="n">gwlist</span><span class="p">,</span><span class="n">description</span><span class="p">)</span> <span class="k">VALUES</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="s2">&quot;DESCRIPTION&quot;</span><span class="p">);</span>
+</pre></div>
+<p>For the &quot;gwlist&quot; column you put in the gwid from the gateways you created in the dr_gateways table, in this example I'm using the gwid of 1. You can also reference multiple gateways by comma separating them like VALUES(&quot;4,3&quot;,&quot;DESCRIPTION). That would use gateways with gwid 3 and 4.</p>
+<p>Last we can setup the rules we are going to use.</p>
+<div class="highlight"><pre><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">INSERT</span> <span class="k">INTO</span> <span class="nf">dr_rules</span><span class="p">(</span><span class="n">groupid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">priority</span><span class="p">,</span><span class="n">gwlist</span><span class="p">,</span><span class="n">description</span><span class="p">)</span> <span class="k">VALUES</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="s2">&quot;4165555555&quot;</span><span class="p">,</span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="s2">&quot;My Number&quot;</span><span class="p">);</span>
+</pre></div>
+<p>So we can see here that the groupid is 0 like we added to dr_groups. The prefix is the number to match, in this case it is a full DID, you can put less or more specific prefixes in there to your liking. For example I could add a default route by leaving the prefix empty or match all 416 numbers by putting the prefix as &quot;416&quot;. It will match the most specific prefix and route accordingly. The &quot;gwlist&quot; column references either the gateway from dr_gateways or the gateway list from dr_gw_lists. My example above uses the gateway with a gwid of 1, to use a gateway list just add a &quot;#&quot; before the id number of the entry from dr_gw_lists.</p>
+<p>Now we can look at changing the opensips configuration files.</p>
+<p>You need to add the following to your /etc/opensips/opensips.cfg file (if they don't already exist):</p>
+<div class="highlight"><pre><span class="go">loadmodule &quot;drouting.so&quot;</span>
+<span class="go">loadmodule &quot;db_mysql.so&quot;</span>
+</pre></div>
+<p>Now add the drouting module options:</p>
+<div class="highlight"><pre><span class="go">modparam(&quot;drouting&quot;, &quot;db_url&quot;, &quot;mysql://DBUSER:DBPASSWD@localhost/DBNAME&quot;)</span>
+<span class="go">modparam(&quot;drouting&quot;, &quot;probing_interval&quot;, 60)</span>
+<span class="go">modparam(&quot;drouting&quot;, &quot;probing_from&quot;, &quot;sip:probe@URI&quot;)</span>
+<span class="go">modparam(&quot;drouting&quot;, &quot;probing_method&quot;, &quot;OPTIONS&quot;)</span>
+<span class="go">modparam(&quot;drouting&quot;, &quot;probing_reply_codes&quot;, &quot;501, 403, 404&quot;)</span>
+<span class="go">modparam(&quot;drouting&quot;, &quot;use_domain&quot;, 1)</span>
+</pre></div>
+<p>For DBUSER put in the username you gave access to the opensips database, DBPASSWD is the password of that user and DBNAME is the database name. The next items just setup the probing configuration where probing_interval is how often it polls in seconds, probing_from is the URI you send from, probing_method is the call that you will make (different for some types of gateways), and probing_reply_codes are the codes other than a 200 that will be considered valid.</p>
+<p>Since the database is taken care of and populated, it's time to add the dynamic routing entries to your routing config.</p>
+<p>In your main routing block you need to add something similar to the following:</p>
+<div class="highlight"><pre><span class="go">if (method == &quot;INVITE&quot;) {</span>
+<span class="go">                setflag(1);</span>
+<span class="go">        record_route();</span>
+<span class="go">                xlog(&quot;INBOUND CALL,$dd,$ru,$ci,$fn,$fu&quot;);</span>
+<span class="go">        route(10);</span>
+<span class="go">        exit;</span>
+<span class="go">}</span>
+</pre></div>
+<p>This will call the subroute of 10 when an INVITE is called, so we have to add that too.</p>
+<div class="highlight"><pre><span class="go">route[10] {</span>
+<span class="go">    if (!do_routing(&quot;0&quot;)) {</span>
+<span class="go">        xlog(&quot;do_routing: No rules matching the URI\n&quot;);</span>
+<span class="go">        send_reply(&quot;503&quot;,&quot;No rules matching the URI&quot;);</span>
+<span class="go">        exit;</span>
+<span class="go">    }</span>
+
+<span class="go">    if (is_method(&quot;INVITE&quot;)) {</span>
+<span class="go">        t_on_failure(&quot;10&quot;);</span>
+<span class="go">    }</span>
+<span class="go">    route(1);</span>
+<span class="go">}</span>
+</pre></div>
+<p>This is where your dr_groups table entry is important. The do_routing(&quot;0&quot;) is calling the group with the groupid of zero and will lookup any subsequent routes that have 0 as the groupid.</p>
+<p>It also primes a failure route incase it fails, we will need to add this as well.</p>
+<div class="highlight"><pre><span class="go">failure_route[10] {</span>
+<span class="go">    xlog(&quot;DEBUG: DROUTING failure route active\n&quot;);</span>
+<span class="go">    if (t_was_cancelled()) {</span>
+<span class="go">        exit;</span>
+<span class="go">    }</span>
+<span class="go">    if (t_check_status(&quot;[34][0-9][0-9]&quot;)) {</span>
+<span class="go">        exit;</span>
+<span class="go">    }</span>
+
+<span class="go">    if (use_next_gw()) {</span>
+<span class="go">        t_relay();</span>
+<span class="go">        exit;</span>
+<span class="go">    } else {</span>
+<span class="go">    t_reply (&quot;503&quot;, &quot;Service not available&quot;);</span>
+<span class="go">        exit;</span>
+<span class="go">    }</span>
+<span class="go">}</span>
+</pre></div>
+<p>On failure it will lookup the next gateway in the gw_list (if active) and try and fail the call to that secondary gateway.</p>
+<p>This should be all you need to get started. You can add something very similar to route outbound calls. Where you setup another dr_groups entry, along with all the necessary gateways and rules. Then to differentiate between inbound and outbound calls  you can add another entry to your main routing block that contains:</p>
+<div class="highlight"><pre><span class="go">if (method == &quot;INVITE&quot; &amp;&amp; src_ip =~ &quot;xxx\.xxx\.xxx.*&quot; ) {</span>
+</pre></div>
+<p>Where xxx.xxx.xxx is a local subnet that your freeswitch would be sending invites from.</p>
+<p>Finally just add another routing block, something like route[20] and set up do_routing to reference your new outbound group from dr_groups.</p>
+<p>Leave a comment if you run into problems. If you've followed other tutorials and it is failing, make sure that in your dr_rules table the routeid isn't set to anything.</p>
+<p>You can check out the dynamic routing module man page here: <a class="reference external" href="http://www.opensips.org/html/docs/modules/devel/drouting.html">http://www.opensips.org/html/docs/modules/devel/drouting.html</a></p>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>

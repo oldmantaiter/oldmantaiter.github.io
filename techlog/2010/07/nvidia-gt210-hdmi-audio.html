@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>nVIDIA GT210 - HDMI Audio // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Fri 16 July 2010</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>nVIDIA GT210 - HDMI Audio</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/linux.html">linux</a>
+                                <a class="post-category" href="../../../tag/hdmi.html">hdmi</a>
+                                <a class="post-category" href="../../../tag/audio.html">audio</a>
+                        </p>
+                </header>
+            </section>
+            <p>Recently my Shuttle HTPC started having issues when booting into Gnome using any sort of hardware video acceleration. I would turn it on and watch it boot until it got to the login screen, at this point it would either let me login and then power off or just power off before it got to the graphical login screen.</p>
+<p>I decided to pick up a new video card with HDMI so I wouldn't have to switch my speaker input to direct each time I wanted to use my PC. I grabbed the EVGA GeForce 210 from Tiger Direct and after some power setting changes in the BIOS, the computer booted and automatically started using the newly plugged in HDMI cable!</p>
+<p>Now all I had to do was get the sound working.
+To get sound output, I first needed to turn off the onboard HD audio from the BIOS because it is also made by nVIDIA and will cause problems when trying to get the sound going.</p>
+<p>Next I found a great thread (<a class="reference external" href="http://forum.xbmc.org/showthread.php?t=69601">http://forum.xbmc.org/showthread.php?t=69601</a>) for XBMC and how to setup HDMI audio. Their config sort of worked for me but I had to change a few things.</p>
+<p>Please note that this is for Fedora.</p>
+<p>First I noticed that the prerequisites for their version required alsa 1.0.23 drivers. Fedora only had 1.0.21 by default so I needed to grab packages from ATrpms.</p>
+<p>I added the repo for yum as follows:</p>
+<p>Create the file <strong>/etc/yum.repos.d/atrpms.repo</strong> with the following contents:</p>
+<div class="highlight"><pre><span class="go">[atrpms]</span>
+<span class="go">name=Fedora Core $releasever - $basearch - ATrpms</span>
+<span class="go">baseurl=http://dl.atrpms.net/f$releasever-$basearch/atrpms/stable</span>
+<span class="go">gpgkey=http://atrpms.net/RPM-GPG-KEY.atrpms</span>
+<span class="go">gpgcheck=1</span>
+</pre></div>
+<p>Then you can run</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> yum install alsa-driver
+</pre></div>
+<p>Install any dependencies that are required.</p>
+<p>Next you need to configure the hd sound module to work properly. As it stands right now, your machine will probably tell you that it has 4 SPDIF outputs for the card, this will not work so we have to change it.</p>
+<p>Create the file <strong>/etc/modprobe.d/sound.conf</strong> with the following contents:</p>
+<div class="highlight"><pre><span class="go">options snd-hda-intel enable_msi=0 probe_mask=0xfff2</span>
+</pre></div>
+<p>Now reboot your machine, a quick look at <strong>/proc/asound/version</strong> should show that the drivers are now at 1.0.23.</p>
+<p>At this point you should have some sound, but if you don't fire up alsamixer and change the soundcard  to the nVIDIA card and see if the line is muted. If it is muted, just press &quot;m&quot; to unmute.</p>
+<p>And that should be it! If you are still having trouble with this, leave a comment and I can try and work through it with you.</p>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>

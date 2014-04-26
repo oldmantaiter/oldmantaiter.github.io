@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>Console Redirection with XEN and Linux for Sun iLOM/IPMI // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Fri 07 October 2011</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>Console Redirection with XEN and Linux for Sun iLOM/IPMI</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/xen.html">xen</a>
+                                <a class="post-category" href="../../../tag/ipmi.html">ipmi</a>
+                                <a class="post-category" href="../../../tag/console.html">console</a>
+                        </p>
+                </header>
+            </section>
+            <p>Having a working IPMI/ILOM card is pretty much essential when rolling out a new system to a remote location or lights-out data center. There were some issues in getting the onboard Sun IPMI card on a Sun Fire X4100 (this should work for X4140 X4200 X4600 etc) to print to both the graphical console as well as the serial when using Xen.</p>
+<p>One of the issues is that Xen wants to grab by default ttyS0 which is what the Sun IPMI serial port is and as I understand it, have the wrong serial port settings.</p>
+<p>So here is the configuration to get it working and sending to both the serial and regular system console (VGA, IPMI redirection via web):</p>
+<p>Change /etc/grub.conf to have something similar to the following:</p>
+<div class="highlight"><pre><span class="go">title CentOS (xen)</span>
+<span class="go">     root (hd0,0)</span>
+<span class="go">       kernel /xen.gz com1=9600,8n1</span>
+<span class="go">       module /vmlinuz-xen ro root=LABEL=/ console=ttyS0,9600n8 console=tty0</span>
+<span class="go">       module /initrd-xen.img</span>
+</pre></div>
+<p>On the Xen kernel line there is one argument:</p>
+<p>com1=9600,8n1 : This is the line to make the Xen console play nice with the Sun. Please note that if your IPMI console is set to another speed you will have to change 9600 to match the speed you are using.</p>
+<p>On the system kernel line there are a few more added arguments:</p>
+<p>console=ttyS0,9600n8 : Adding this will activate the IPMI serial console, remember that if your serial port settings are different you will need to change the 9600n8 part to whatever will match with yours.</p>
+<p>console=tty0 : This just ensures that the output will be redirected to the default console (VGA etc.)</p>
+<p>Edit /etc/inittab and add the below line:</p>
+<div class="highlight"><pre><span class="go">co:2345:respawn:/sbin/agetty ttyS0 9600 vt100-nav</span>
+</pre></div>
+<p>Add ttyS0 to /etc/securetty</p>
+<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> <span class="nb">echo</span> <span class="s2">&quot;ttyS0&quot;</span> &gt;&gt; /etc/securetty
+</pre></div>
+<p>Now you should be able to see everything in the serial console via the IPMI as if it were on a monitor infront of you.</p>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>
