@@ -3,8 +3,9 @@
 &lt;p&gt;For those of you who may not know what Disco (also know as the Disco Project) can do and why it is so powerful, it's core is written in Erlang and the workers for job parts run Python (more languages coming).
 This means that running anything from regular aggregation/exploration jobs to machine learning using the great libraries and quick prototyping available with Python.&lt;/p&gt;
 &lt;p&gt;When comparing Disco to Hadoop, which I hope to do in detail in the very near future, it is important to note the simplicity of Disco. It uses the concurrency and clustering of Erlang so you don't
-require anything other than one master server to submit jobs and push files into the Disco Distributed File System (DDFS). This also means that there is virtually no latency when starting jobs and
-getting up and running quickly; a requirement for the distributed, relational event database that Chango has open sourced called &lt;a class="reference external" href="https://github.com/chango/hustle"&gt;Hustle&lt;/a&gt; that
+require anything other than one master server to submit jobs and push files into the Disco Distributed File System (DDFS). You can even run a single node cluster that includes the master and a node on the same machine.
+This also means that there is virtually no latency when starting jobs and getting up and running quickly; a requirement for the distributed, relational event database that &lt;a class="reference external" href="http://www.chango.com"&gt;Chango&lt;/a&gt;
+has open sourced called &lt;a class="reference external" href="https://github.com/chango/hustle"&gt;Hustle&lt;/a&gt; that
 I won't be going into great detail in this particular post, but it is definitely worth taking a look and reading about how it works.&lt;/p&gt;
 &lt;p&gt;Another advantage of Disco is that you can run a single node cluster on your local laptop (I run it on a MacBook Air) to test jobs and push data into DDFS; it has almost zero overhead and you don't
 need to run it in a virtual machine and download a distro like Cloudera and fuss around with XML (which is a massive plus in my opinion).&lt;/p&gt;
