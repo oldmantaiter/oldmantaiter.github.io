@@ -65,10 +65,10 @@ This means that running anything from regular aggregation/exploration jobs to ma
 require anything other than one master server to submit jobs and push files into the Disco Distributed File System (DDFS). This also means that there is virtually no latency when starting jobs and
 getting up and running quickly; a requirement for the distributed, relational event database that Chango has open sourced called <a class="reference external" href="https://github.com/chango/hustle">Hustle</a> that
 I won't be going into great detail in this particular post, but it is definitely worth taking a look and reading about how it works.</p>
-<p>Another great difference of Disco is that you can run a single node cluster on your local laptop (I run it on a MacBook Air) to test jobs and push data into DDFS, it really has low overhead and you don't
+<p>Another advantage of Disco is that you can run a single node cluster on your local laptop (I run it on a MacBook Air) to test jobs and push data into DDFS; it has almost zero overhead and you don't
 need to run it in a virtual machine and download a distro like Cloudera and fuss around with XML (which is a massive plus in my opinion).</p>
 <p>Not only does Disco allow you to run regular MapReduce jobs, but you can use pipelines starting from version 0.5.x. <a class="reference external" href="http://disco.readthedocs.org/en/latest/howto/pipeline.html">Pipelines</a> are extremely powerful,
-which is a linear sequency of stages, where the outputs of each stage are grouped into the input of the subsequent stage.</p>
+defined as a linear sequence of stages, where the outputs of each stage are grouped into the input of the subsequent stage.</p>
 <p>At <a class="reference external" href="http://www.chango.com">Chango</a> we use Disco as our data crunching powerhouse, ploughing through our massive amounts of data with ease and allowing our data scientists to quickly prototype and isolate subsets
 of data to run machine learning algorithms.</p>
 <p>I will be following this post, which is really an introduction to Disco, with some examples and some deeper concepts of running pipelines.</p>
