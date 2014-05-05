@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>tait.clarridge</title><link href="http://oldmantaiter.github.io/" rel="alternate"></link><link href="http://oldmantaiter.github.io/feeds/data.atom.xml" rel="self"></link><id>http://oldmantaiter.github.io/</id><updated>2014-05-05T15:36:00-04:00</updated><entry><title>Disco - A Powerful Erlang and Python Map/Reduce Framework</title><link href="http://oldmantaiter.github.io/techlog/2014/05/disco-a-powerful-erlang-and-python-mapreduce-framework.html" rel="alternate"></link><updated>2014-05-05T15:36:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2014-05-05:techlog/2014/05/disco-a-powerful-erlang-and-python-mapreduce-framework.html</id><summary type="html">&lt;p&gt;In the wake of &lt;a class="reference external" href="http://www.pydata.org"&gt;PyData 2014&lt;/a&gt; I felt it was important to share my thoughts on the power of &lt;a class="reference external" href="http://www.discoproject.org"&gt;Disco&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For those of you who may not know what Disco (also know as the Disco Project) can do and why it is so powerful, it's core is written in Erlang and the workers for job parts run Python (more languages coming).
+This means that running anything from regular aggregation/exploration jobs to machine learning using the great libraries and quick prototyping available with Python.&lt;/p&gt;
+&lt;p&gt;When comparing Disco to Hadoop, which I hope to do in detail in the very near future, it is important to note the simplicity of Disco. It uses the concurrency and clustering of Erlang so you don't
+require anything other than one master server to submit jobs and push files into the Disco Distributed File System (DDFS). This also means that there is virtually no latency when starting jobs and
+getting up and running quickly; a requirement for the distributed, relational event database that Chango has open sourced called &lt;a class="reference external" href="https://github.com/chango/hustle"&gt;Hustle&lt;/a&gt; that
+I won't be going into great detail in this particular post, but it is definitely worth taking a look and reading about how it works.&lt;/p&gt;
+&lt;p&gt;Another great difference of Disco is that you can run a single node cluster on your local laptop (I run it on a MacBook Air) to test jobs and push data into DDFS, it really has low overhead and you don't
+need to run it in a virtual machine and download a distro like Cloudera and fuss around with XML (which is a massive plus in my opinion).&lt;/p&gt;
+&lt;p&gt;Not only does Disco allow you to run regular MapReduce jobs, but you can use pipelines starting from version 0.5.x. &lt;a class="reference external" href="http://disco.readthedocs.org/en/latest/howto/pipeline.html"&gt;Pipelines&lt;/a&gt; are extremely powerful,
+which is a linear sequency of stages, where the outputs of each stage are grouped into the input of the subsequent stage.&lt;/p&gt;
+&lt;p&gt;At &lt;a class="reference external" href="http://www.chango.com"&gt;Chango&lt;/a&gt; we use Disco as our data crunching powerhouse, ploughing through our massive amounts of data with ease and allowing our data scientists to quickly prototype and isolate subsets
+of data to run machine learning algorithms.&lt;/p&gt;
+&lt;p&gt;I will be following this post, which is really an introduction to Disco, with some examples and some deeper concepts of running pipelines.&lt;/p&gt;
+&lt;p&gt;Futhermore, I am going to assist in easier packaging and bundling of Disco (including test data sets), maybe with an iPython Notebook, to help those who may not be entirely familiar with python and map reduce
+concepts the ability to explore.&lt;/p&gt;
+&lt;p&gt;The Disco community is growing, and if you are interested I highly suggest joining in and trying it out for your workloads. I will release more information about the packaging (most likely using &lt;a class="reference external" href="http://conda.pydata.org/"&gt;Conda&lt;/a&gt;)
+and iPython Notebook as I get more time to develop it.&lt;/p&gt;
+&lt;div class="section" id="links"&gt;
+&lt;h2&gt;Links&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://groups.google.com/forum/#!forum/disco-dev"&gt;Disco Mailing List&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://github.com/discoproject/disco"&gt;Disco on Github&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+</summary><category term="discoproject"></category><category term="disco"></category><category term="pipeline"></category><category term="map-reduce"></category><category term="bigdata"></category><category term="hustle"></category><category term="erlang"></category><category term="python"></category></entry></feed>

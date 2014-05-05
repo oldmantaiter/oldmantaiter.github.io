@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tait.clarridge, Devops all day every day.">
+
+        <link rel="alternate"  href="http://oldmantaiter.github.io/feeds/all.atom.xml" type="application/atom+xml" title="tait.clarridge Full Atom Feed"/>
+        <link rel="alternate" href="http://oldmantaiter.github.io/feeds/all.rss.xml" type="application/rss+xml" title="tait.clarridge Full RSS Feed"/>
+
+        <title>Disco - A Powerful Erlang and Python Map/Reduce Framework // tait.clarridge // Devops all day every day.</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <link rel="stylesheet" href="../../../theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="../../../author/tait-clarridge.html" title="See posts by Tait Clarridge">
+                    <img class="article-avatar" alt="Tait Clarridge" src="http://www.gravatar.com/avatar/217f896fda4adf7ab81c69df92169297">
+                </a>
+                <h2 class="article-info">Tait Clarridge</h2>
+                <small class="about-author"></small>
+                <h5>Published</h5>
+                <p>Mon 05 May 2014</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>Disco - A Powerful Erlang and Python Map/Reduce Framework</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="../../../tag/discoproject.html">discoproject</a>
+                                <a class="post-category" href="../../../tag/disco.html">disco</a>
+                                <a class="post-category" href="../../../tag/pipeline.html">pipeline</a>
+                                <a class="post-category" href="../../../tag/map-reduce.html">map-reduce</a>
+                                <a class="post-category" href="../../../tag/bigdata.html">bigdata</a>
+                                <a class="post-category" href="../../../tag/hustle.html">hustle</a>
+                                <a class="post-category" href="../../../tag/erlang.html">erlang</a>
+                                <a class="post-category" href="../../../tag/python.html">python</a>
+                        </p>
+                </header>
+            </section>
+            <p>In the wake of <a class="reference external" href="http://www.pydata.org">PyData 2014</a> I felt it was important to share my thoughts on the power of <a class="reference external" href="http://www.discoproject.org">Disco</a>.</p>
+<p>For those of you who may not know what Disco (also know as the Disco Project) can do and why it is so powerful, it's core is written in Erlang and the workers for job parts run Python (more languages coming).
+This means that running anything from regular aggregation/exploration jobs to machine learning using the great libraries and quick prototyping available with Python.</p>
+<p>When comparing Disco to Hadoop, which I hope to do in detail in the very near future, it is important to note the simplicity of Disco. It uses the concurrency and clustering of Erlang so you don't
+require anything other than one master server to submit jobs and push files into the Disco Distributed File System (DDFS). This also means that there is virtually no latency when starting jobs and
+getting up and running quickly; a requirement for the distributed, relational event database that Chango has open sourced called <a class="reference external" href="https://github.com/chango/hustle">Hustle</a> that
+I won't be going into great detail in this particular post, but it is definitely worth taking a look and reading about how it works.</p>
+<p>Another great difference of Disco is that you can run a single node cluster on your local laptop (I run it on a MacBook Air) to test jobs and push data into DDFS, it really has low overhead and you don't
+need to run it in a virtual machine and download a distro like Cloudera and fuss around with XML (which is a massive plus in my opinion).</p>
+<p>Not only does Disco allow you to run regular MapReduce jobs, but you can use pipelines starting from version 0.5.x. <a class="reference external" href="http://disco.readthedocs.org/en/latest/howto/pipeline.html">Pipelines</a> are extremely powerful,
+which is a linear sequency of stages, where the outputs of each stage are grouped into the input of the subsequent stage.</p>
+<p>At <a class="reference external" href="http://www.chango.com">Chango</a> we use Disco as our data crunching powerhouse, ploughing through our massive amounts of data with ease and allowing our data scientists to quickly prototype and isolate subsets
+of data to run machine learning algorithms.</p>
+<p>I will be following this post, which is really an introduction to Disco, with some examples and some deeper concepts of running pipelines.</p>
+<p>Futhermore, I am going to assist in easier packaging and bundling of Disco (including test data sets), maybe with an iPython Notebook, to help those who may not be entirely familiar with python and map reduce
+concepts the ability to explore.</p>
+<p>The Disco community is growing, and if you are interested I highly suggest joining in and trying it out for your workloads. I will release more information about the packaging (most likely using <a class="reference external" href="http://conda.pydata.org/">Conda</a>)
+and iPython Notebook as I get more time to develop it.</p>
+<div class="section" id="links">
+<h2>Links</h2>
+<blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://groups.google.com/forum/#!forum/disco-dev">Disco Mailing List</a></li>
+<li><a class="reference external" href="https://github.com/discoproject/disco">Disco on Github</a></li>
+</ul>
+</blockquote>
+</div>
+
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "oldmantaiter"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; tait.clarridge &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+    <script type="text/javascript">$(".gist-file table tr td.line-numbers").remove();</script>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-45723915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+    </script>
+</body>
+</html>
