@@ -62,7 +62,7 @@
 <p>For those of you who may not know what Disco (also know as the Disco Project) can do and why it is so powerful, it's core is written in Erlang and the workers for job parts run Python (more languages coming).
 This means that running anything from regular aggregation/exploration jobs to machine learning using the great libraries and quick prototyping available with Python.</p>
 <p>When comparing Disco to Hadoop, which I hope to do in detail in the very near future, it is important to note the simplicity of Disco. It uses the concurrency and clustering of Erlang so you don't
-require anything other than one master server to submit jobs and push files into the Disco Distributed File System (DDFS). You can even run a single node cluster that includes the master and a node on the same machine.
+require anything other than one master server to submit jobs and push files into the Disco Distributed File System (DDFS).
 This also means that there is virtually no latency when starting jobs and getting up and running quickly; a requirement for the distributed, relational event database that <a class="reference external" href="http://www.chango.com">Chango</a>
 has open sourced called <a class="reference external" href="https://github.com/chango/hustle">Hustle</a> that
 I won't be going into great detail in this particular post, but it is definitely worth taking a look and reading about how it works.</p>
