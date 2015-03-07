@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>tait.clarridge</title><link href="http://oldmantaiter.github.io/" rel="alternate"></link><link href="http://oldmantaiter.github.io/feeds/all-en.atom.xml" rel="self"></link><id>http://oldmantaiter.github.io/</id><updated>2014-05-05T15:36:00-04:00</updated><entry><title>Disco - A Powerful Erlang and Python Map/Reduce Framework</title><link href="http://oldmantaiter.github.io/techlog/2014/05/disco-a-powerful-erlang-and-python-mapreduce-framework.html" rel="alternate"></link><updated>2014-05-05T15:36:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2014-05-05:techlog/2014/05/disco-a-powerful-erlang-and-python-mapreduce-framework.html</id><summary type="html">&lt;p&gt;In the wake of &lt;a class="reference external" href="http://www.pydata.org"&gt;PyData 2014&lt;/a&gt; I felt it was important to share my thoughts on the power of &lt;a class="reference external" href="http://www.discoproject.org"&gt;Disco&lt;/a&gt;.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>oldmantaiter</title><link href="http://oldmantaiter.github.io/" rel="alternate"></link><link href="http://oldmantaiter.github.io/feeds/all-en.atom.xml" rel="self"></link><id>http://oldmantaiter.github.io/</id><updated>2015-02-23T16:08:00-05:00</updated><entry><title>kdump/kexec with AACRAID</title><link href="http://oldmantaiter.github.io/techlog/2015/02/kdumpkexec-with-aacraid.html" rel="alternate"></link><updated>2015-02-23T16:08:00-05:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2015-02-23:techlog/2015/02/kdumpkexec-with-aacraid.html</id><summary type="html">&lt;p&gt;Back in November we started testing Spark on CentOS 7 and had run into a nasty issue where our nodes would appear to reboot and leave no core dump in /var/crash. This initially led me to believe
+that there might have been an issue involving hardware incompatibility or a power issue, it was the first time we had that combination of motherboard and CPU. We have also had a ton of issues with the Adaptec 7 series cards
+and them ejecting drives from the array under heavy I/O (a neat feature really), and sometimes the card hanging as well under high I/O. Strangely enough
+for that issue we found that disabling the write caching (specifically in front of SSDs) would stop the ejection of the drive. Still, not a great situation.&lt;/p&gt;
+&lt;p&gt;With all that information I approached the issue with a misguided idea of thinking it was a firmware issue - not without some well deserved doubts about the Adaptec controller from previous experiences. I updated
+the aacraid kernel module to the latest available, the controller firmware, the BIOS even and it appeared to be going well for a little while... then the crashes returned.&lt;/p&gt;
+&lt;p&gt;So at this point, I'm thinking its definitely not a RAID card issue. I remembered another CentOS 7 testing box had rebooted a week or two prior when under a light/medium workload. Maybe it could
+shed some light on the situation, if it captured a core dump. And sure enough it did (it had no RAID card), and there even was an upstream kernel fix for that issue (&lt;a class="reference external" href="https://github.com/torvalds/linux/commit/e15693ef18e13e3e6bffe891fe140f18b8ff6d07?diff=unified"&gt;cfq-iosched: Fix wrong children_weight calculation&lt;/a&gt;).
+It appeared as though my investigation had come to a close, so I backported the fix to the latest CentOS 7 kernel that was available and asked everyone testing the cluster by shoving as many jobs down its throat as possible - the cluster smiled happily
+for a few hours so I went for a coffee, and then... more failures.&lt;/p&gt;
+&lt;p&gt;Finally, I decided to start looking into the aacraid module and kdump.
+I added aacraid to the extra_modules section in /etc/kdump.conf and added the root disk's UUID for good measure, then issued a panic hoping that the issue might have been a simple misconfiguration of kdump (something I should have tried from the beginning),
+alas it could not find the disk (and RAID controller) so I set it to default to a shell and tried again.
+Once in the shell I checked dmesg for aacraid messages, the driver loads but there is no output from the driver saying it found drives or a controller for that matter, and eventually fails after a long timeout with:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="go"&gt;AAC0: adapter kernel failed to start, init status = 0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It was time to start digging deeper, I looked through the changelogs for the EL7 kernel for anything involving the aacraid module. Turns out there have been multiple patches and bugfixes over the past couple years for aacraid not playing well with
+the reset_devices boot flag. At this point I thought &amp;quot;What the hell, why not just remove it and see what happens&amp;quot;,
+I removed the reset_devices from the KDUMP_COMMANDLINE_APPEND variable in /etc/sysconfig/kdump, restarted the kdump service (which rebuilt the boot image), and issued another panic.&lt;/p&gt;
+&lt;p&gt;This time.... SUCCESS! The drive was mounted and the dump began.&lt;/p&gt;
+&lt;p&gt;After all that extra work I gave myself (through misdiagnosis), it was the removal of 13 characters from one file that will enable me to see what is causing this box to panic - and almost forced us back to using CentOS 6.&lt;/p&gt;
+&lt;p&gt;As an aside, the issue really is with these RAID cards. After much more investigation and a ton of late nights with Pagerduty and I becoming the best of friends, we were getting nowhere. The RAID card would not only eject drives but actually become unavailable and bring the entire box down.&lt;/p&gt;
+&lt;p&gt;We reprovisioned with LSI cards and the nodes haven't had an issue since.&lt;/p&gt;
+</summary><category term="aacraid"></category><category term="centos7"></category><category term="el7"></category><category term="rhel7"></category></entry><entry><title>Disco - A Powerful Erlang and Python Map/Reduce Framework</title><link href="http://oldmantaiter.github.io/techlog/2014/05/disco-a-powerful-erlang-and-python-mapreduce-framework.html" rel="alternate"></link><updated>2014-05-05T15:36:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.github.io,2014-05-05:techlog/2014/05/disco-a-powerful-erlang-and-python-mapreduce-framework.html</id><summary type="html">&lt;p&gt;In the wake of &lt;a class="reference external" href="http://www.pydata.org"&gt;PyData 2014&lt;/a&gt; I felt it was important to share my thoughts on the power of &lt;a class="reference external" href="http://www.discoproject.org"&gt;Disco&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;For those of you who may not know what Disco (also know as the Disco Project) can do and why it is so powerful, it's core is written in Erlang and the workers for job parts run Python (more languages coming).
 This means that running anything from regular aggregation/exploration jobs to machine learning using the great libraries and quick prototyping available with Python.&lt;/p&gt;
 &lt;p&gt;When comparing Disco to Hadoop, which I hope to do in detail in the very near future, it is important to note the simplicity of Disco. It uses the concurrency and clustering of Erlang so you don't
@@ -145,7 +168,7 @@ Make sure that you have setup whichever switchport on your switch to be a dot1q 
 &lt;span class="go"&gt;taiter-sw(config-if)# end&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Then issue the following commands (substituting your NIC for where I've put atge0):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;root@taiter:~#&lt;/span&gt; dladm create-vnic -l atge0 -v 30 atge0.30
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;root@taiter:~#&lt;/span&gt; dladm create-vnic -l atge0 -v &lt;span class="m"&gt;30&lt;/span&gt; atge0.30
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The argument for the VLAN is -v VLANID and then you can call your new virtual interface whatever you like. I tend to like the INTERFACE.VLAN naming.&lt;/p&gt;
 &lt;p&gt;Now we can give an IP to the new VNIC.&lt;/p&gt;
@@ -340,8 +363,8 @@ To get sound output, I first needed to turn off the onboard HD audio from the BI
 &lt;p&gt;So now we are ready to start creating the iptables rules, I do these first but you can do them after creating the routing rules if you would like (those will follow this section).&lt;/p&gt;
 &lt;p&gt;Our Openfire installation uses a custom port, but I will show this with the default ports (tcp ports 5222 and 5223). This will work for any port you would like. Our OpenVPN setup uses tun0 as the tunnel adaptor so that is the interface we wish to forward packets from.&lt;/p&gt;
 &lt;p&gt;We are going to use the PREROUTING table as we need to mark the packets before they get routed.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5222
-&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5223
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; iptables -t mangle -A PREROUTING -j MARK --set-mark &lt;span class="m"&gt;85&lt;/span&gt; -i tun0 -p tcp --dport 5222
+&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; iptables -t mangle -A PREROUTING -j MARK --set-mark &lt;span class="m"&gt;85&lt;/span&gt; -i tun0 -p tcp --dport 5223
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;As you can see, the --set-mark flag value is our number that we picked in a previous section. It correlates to the fwmark 0x55 rule that we will be creating (because they are equal values, just one is decimal and the other is hex).&lt;/p&gt;
 &lt;p&gt;The -i flag is the interface we want iptables to mark packets from.&lt;/p&gt;
@@ -349,7 +372,7 @@ To get sound output, I first needed to turn off the onboard HD audio from the BI
 &lt;p&gt;This basically means that any traffic coming through tun0 heading for tcp port 5222 or 5223 will get marked with the number 85.&lt;/p&gt;
 &lt;p&gt;So now we can set the routing rules to deal with the marked packets.&lt;/p&gt;
 &lt;p&gt;First we are going to set the default route for table 300 so all our marked packets will go through there. I am going to use 192.168.0.1 as the gateway.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip route add table 300 default via 192.168.0.1
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip route add table &lt;span class="m"&gt;300&lt;/span&gt; default via 192.168.0.1
 &lt;span class="go"&gt;# Now tell the rule which table to look up&lt;/span&gt;
 &lt;span class="gp"&gt;[root@tclarrltp ~]#&lt;/span&gt; ip rule add fwmark 0x55 table 300
 &lt;/pre&gt;&lt;/div&gt;
@@ -359,9 +382,9 @@ To get sound output, I first needed to turn off the onboard HD audio from the BI
 
 ip route flush table 300
 ip rule del fwmark 0x55
-iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5222
-iptables -t mangle -A PREROUTING -j MARK --set-mark 85 -i tun0 -p tcp --dport 5223
-ip route add table 300 default via 192.168.0.1
+iptables -t mangle -A PREROUTING -j MARK --set-mark &lt;span class="m"&gt;85&lt;/span&gt; -i tun0 -p tcp --dport 5222
+iptables -t mangle -A PREROUTING -j MARK --set-mark &lt;span class="m"&gt;85&lt;/span&gt; -i tun0 -p tcp --dport 5223
+ip route add table &lt;span class="m"&gt;300&lt;/span&gt; default via 192.168.0.1
 ip rule add fwmark 0x55 table 300
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;If you have any questions, feel free to leave me a comment or send me an email.&lt;/p&gt;
