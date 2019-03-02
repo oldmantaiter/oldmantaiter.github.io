@@ -1,0 +1,19 @@
+section#contact {
+	display:none;
+}
+
+section#portfolio {
+	display:none;
+}
+
+header {
+	background: #1F76F7;
+}
+
+section.success{
+	background: #1F76F7;
+}
+
+div.col-lg-8.col-lg-offset-2.text-center {
+	display: none;
+}
