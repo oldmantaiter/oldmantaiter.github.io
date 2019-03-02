@@ -4,21 +4,21 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Back in November we started testing Spark on CentOS 7 and had run into a nasty issue where our nodes would appear to reboot and leave no core dump in /var/crash. This initially led me to believe that ...">
+        <meta name="description" content="Back in November we started testing Spark on CentOS 7 and had run into a nasty issue where our nodes would appear to reboot and leave no core dump in /var/crash. This initially led me to believe...">
         <meta name="keywords" content="aacraid, centos7, el7, rhel7">
-        <link rel="icon" href="http://www.taitclarridge.com/favicon.ico">
+        <link rel="icon" href="https://oldmantaiter.dev/favicon.ico">
 
         <title>kdump/kexec with AACRAID - oldmantaiter</title>
 
         <!-- Stylesheets -->
-        <link href="http://www.taitclarridge.com/theme/css/all.min.css" rel="stylesheet">
+        <link href="https://oldmantaiter.dev/theme/css/all.min.css" rel="stylesheet">
         <!-- /Stylesheets -->
 
         <!-- RSS Feeds -->
-        <link href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
         <!-- /RSS Feeds -->
 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -50,11 +50,9 @@
             <div class="container">
                 <div class="header-nav">
                     <div class="header-logo">
-                        <a class="pull-left" href="http://www.taitclarridge.com/">oldmantaiter</a>
+                        <a class="pull-left" href="https://oldmantaiter.dev/">oldmantaiter</a>
                     </div>
                     <div class="nav pull-right">
-                            <a href="http://www.taitclarridge.com/about.html">About</a>
-                            <a href="http://www.taitclarridge.com/archives.html">Archives</a>
                     </div>
                 </div>
             </div>
@@ -67,12 +65,12 @@
               <div class="col-lg-12">
                   <div class="header-content">
                       <h1 class="header-title">kdump/kexec with AACRAID</h1>
-                      <p class="header-date">By <a href="http://www.taitclarridge.com/author/tait-clarridge.html">Tait Clarridge</a>, Mon 23 February 2015, Category <a href="http://www.taitclarridge.com/category/linux.html">Linux</a></p>
+                      <p class="header-date">By <a href="https://oldmantaiter.dev/author/tait-clarridge.html">Tait Clarridge</a>, Mon 23 February 2015, Category <a href="https://oldmantaiter.dev/category/linux.html">Linux</a></p>
                       <div class="header-underline"></div>
                       <div class="clearfix"></div>
                       <p class="pull-right header-tags">
                           <span class="glyphicon glyphicon-tags mr5" aria-hidden="true"></span>
-<a href="http://www.taitclarridge.com/tag/aacraid.html">aacraid</a>, <a href="http://www.taitclarridge.com/tag/centos7.html">centos7</a>, <a href="http://www.taitclarridge.com/tag/el7.html">el7</a>, <a href="http://www.taitclarridge.com/tag/rhel7.html">rhel7</a>                      </p>
+<a href="https://oldmantaiter.dev/tag/aacraid.html">aacraid</a>, <a href="https://oldmantaiter.dev/tag/centos7.html">centos7</a>, <a href="https://oldmantaiter.dev/tag/el7.html">el7</a>, <a href="https://oldmantaiter.dev/tag/rhel7.html">rhel7</a>                      </p>
                   </div>
               </div>
         </div>
@@ -100,7 +98,7 @@ for a few hours so I went for a coffee, and then... more failures.</p>
 I added aacraid to the extra_modules section in /etc/kdump.conf and added the root disk's UUID for good measure, then issued a panic hoping that the issue might have been a simple misconfiguration of kdump (something I should have tried from the beginning),
 alas it could not find the disk (and RAID controller) so I set it to default to a shell and tried again.
 Once in the shell I checked dmesg for aacraid messages, the driver loads but there is no output from the driver saying it found drives or a controller for that matter, and eventually fails after a long timeout with:</p>
-<div class="highlight"><pre><span class="go">AAC0: adapter kernel failed to start, init status = 0</span>
+<div class="highlight"><pre><span></span><span class="go">AAC0: adapter kernel failed to start, init status = 0</span>
 </pre></div>
 <p>It was time to start digging deeper, I looked through the changelogs for the EL7 kernel for anything involving the aacraid module. Turns out there have been multiple patches and bugfixes over the past couple years for aacraid not playing well with
 the reset_devices boot flag. At this point I thought &quot;What the hell, why not just remove it and see what happens&quot;,
@@ -117,7 +115,7 @@ I removed the reset_devices from the KDUMP_COMMANDLINE_APPEND variable in /etc/s
                     <script type="text/javascript">
                         var disqus_shortname = 'oldmantaiter';
                         var disqus_identifier = 'techlog/2015/02/kdumpkexec-with-aacraid.html';
-                        var disqus_url = 'http://www.taitclarridge.com/techlog/2015/02/kdumpkexec-with-aacraid.html';
+                        var disqus_url = 'https://oldmantaiter.dev/techlog/2015/02/kdumpkexec-with-aacraid.html';
                         (function() {
                             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
                             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
@@ -136,11 +134,11 @@ I removed the reset_devices from the KDUMP_COMMANDLINE_APPEND variable in /etc/s
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
                         <div class="footer-title">Sitemap</div>
                         <ul class="list-unstyled">
-                            <li><a href="http://www.taitclarridge.com/archives.html">Archives</a></li>
-                            <li><a href="http://www.taitclarridge.com/tags.html">Tags</a></li>
-                            <li><a href="http://www.taitclarridge.com/authors.html">Authors</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/archives.html">Archives</a></li>
+                            <li><a href="https://oldmantaiter.dev/tags.html">Tags</a></li>
+                            <li><a href="https://oldmantaiter.dev/authors.html">Authors</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
                         </ul>
                     </div>
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
@@ -156,7 +154,7 @@ I removed the reset_devices from the KDUMP_COMMANDLINE_APPEND variable in /etc/s
                         <p class="pull-right text-right">
                             <small><em>Proudly powered by <a href="http://docs.getpelican.com/" target="_blank">pelican</a></em></small><br/>
                             <small><em>Theme and code by <a href="http://www.molivier.com/" target="_blank">molivier</a></em></small><br/>
-                            <small>&copy; Tait Clarridge 2015</small>
+                            <small>&copy; Tait Clarridge 2019</small>
                         </p>
                     </div>
                 </div>

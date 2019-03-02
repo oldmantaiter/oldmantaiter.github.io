@@ -4,21 +4,21 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="I recently discovered a need to be able to add multiple VLANs on a single interfaces on Solaris. This one is really simple! Just make sure you are running as root, not escalating privileges with ...">
+        <meta name="description" content="I recently discovered a need to be able to add multiple VLANs on a single interfaces on Solaris. This one is really simple! Just make sure you are running as root, not escalating privileges with...">
         <meta name="keywords" content="networking, vlan">
-        <link rel="icon" href="http://www.taitclarridge.com/favicon.ico">
+        <link rel="icon" href="https://oldmantaiter.dev/favicon.ico">
 
         <title>OpenIndiana (Solaris) VLAN Trunk - oldmantaiter</title>
 
         <!-- Stylesheets -->
-        <link href="http://www.taitclarridge.com/theme/css/all.min.css" rel="stylesheet">
+        <link href="https://oldmantaiter.dev/theme/css/all.min.css" rel="stylesheet">
         <!-- /Stylesheets -->
 
         <!-- RSS Feeds -->
-        <link href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
-        <link href="http://www.taitclarridge.com/feeds/unix.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/unix.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/unix.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/unix.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
         <!-- /RSS Feeds -->
 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -50,11 +50,9 @@
             <div class="container">
                 <div class="header-nav">
                     <div class="header-logo">
-                        <a class="pull-left" href="http://www.taitclarridge.com/">oldmantaiter</a>
+                        <a class="pull-left" href="https://oldmantaiter.dev/">oldmantaiter</a>
                     </div>
                     <div class="nav pull-right">
-                            <a href="http://www.taitclarridge.com/about.html">About</a>
-                            <a href="http://www.taitclarridge.com/archives.html">Archives</a>
                     </div>
                 </div>
             </div>
@@ -67,12 +65,12 @@
               <div class="col-lg-12">
                   <div class="header-content">
                       <h1 class="header-title">OpenIndiana (Solaris) VLAN Trunk</h1>
-                      <p class="header-date">By <a href="http://www.taitclarridge.com/author/tait-clarridge.html">Tait Clarridge</a>, Thu 22 March 2012, Category <a href="http://www.taitclarridge.com/category/unix.html">Unix</a></p>
+                      <p class="header-date">By <a href="https://oldmantaiter.dev/author/tait-clarridge.html">Tait Clarridge</a>, Thu 22 March 2012, Category <a href="https://oldmantaiter.dev/category/unix.html">Unix</a></p>
                       <div class="header-underline"></div>
                       <div class="clearfix"></div>
                       <p class="pull-right header-tags">
                           <span class="glyphicon glyphicon-tags mr5" aria-hidden="true"></span>
-<a href="http://www.taitclarridge.com/tag/networking.html">networking</a>, <a href="http://www.taitclarridge.com/tag/vlan.html">vlan</a>                      </p>
+<a href="https://oldmantaiter.dev/tag/networking.html">networking</a>, <a href="https://oldmantaiter.dev/tag/vlan.html">vlan</a>                      </p>
                   </div>
               </div>
         </div>
@@ -91,7 +89,7 @@
 <p>So, lets start this off. Figure out which of your interfaces you want to use as the trunk, in my case it is atge0.
 Make sure that you have setup whichever switchport on your switch to be a dot1q trunk</p>
 <p>In this scenario I have my server originally on a switchport just in access mode on VLAN 10. To make it into a trunk (network will drop for around 30 seconds) you can reconfigure the port with the commands below to still be on VLAN 10 if using Cisco.</p>
-<div class="highlight"><pre><span class="go">taiter-sw# configure terminal</span>
+<div class="highlight"><pre><span></span><span class="go">taiter-sw# configure terminal</span>
 <span class="go">Enter configuration commands, one per line. End with CNTL/Z.</span>
 <span class="go">taiter-sw(config)# interface gi0/5</span>
 <span class="go">taiter-sw(config-if)# switchport</span>
@@ -101,11 +99,11 @@ Make sure that you have setup whichever switchport on your switch to be a dot1q 
 <span class="go">taiter-sw(config-if)# end</span>
 </pre></div>
 <p>Then issue the following commands (substituting your NIC for where I've put atge0):</p>
-<div class="highlight"><pre><span class="gp">root@taiter:~#</span> dladm create-vnic -l atge0 -v <span class="m">30</span> atge0.30
+<div class="highlight"><pre><span></span><span class="gp">root@taiter:~#</span> dladm create-vnic -l atge0 -v <span class="m">30</span> atge0.30
 </pre></div>
 <p>The argument for the VLAN is -v VLANID and then you can call your new virtual interface whatever you like. I tend to like the INTERFACE.VLAN naming.</p>
 <p>Now we can give an IP to the new VNIC.</p>
-<div class="highlight"><pre><span class="gp">root@taiter:~#</span> ifconfig atge0.30 plumb 10.1.1.5/24 up
+<div class="highlight"><pre><span></span><span class="gp">root@taiter:~#</span> ifconfig atge0.30 plumb <span class="m">10</span>.1.1.5/24 up
 </pre></div>
 <p>I've just shown an example, but obviously change 10.1.1.5/24 to your IP and mask that is on that VLAN.</p>
 
@@ -116,7 +114,7 @@ Make sure that you have setup whichever switchport on your switch to be a dot1q 
                     <script type="text/javascript">
                         var disqus_shortname = 'oldmantaiter';
                         var disqus_identifier = 'techlog/2012/03/openindiana-solaris-vlan-trunk.html';
-                        var disqus_url = 'http://www.taitclarridge.com/techlog/2012/03/openindiana-solaris-vlan-trunk.html';
+                        var disqus_url = 'https://oldmantaiter.dev/techlog/2012/03/openindiana-solaris-vlan-trunk.html';
                         (function() {
                             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
                             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
@@ -135,11 +133,11 @@ Make sure that you have setup whichever switchport on your switch to be a dot1q 
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
                         <div class="footer-title">Sitemap</div>
                         <ul class="list-unstyled">
-                            <li><a href="http://www.taitclarridge.com/archives.html">Archives</a></li>
-                            <li><a href="http://www.taitclarridge.com/tags.html">Tags</a></li>
-                            <li><a href="http://www.taitclarridge.com/authors.html">Authors</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/archives.html">Archives</a></li>
+                            <li><a href="https://oldmantaiter.dev/tags.html">Tags</a></li>
+                            <li><a href="https://oldmantaiter.dev/authors.html">Authors</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
                         </ul>
                     </div>
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
@@ -155,7 +153,7 @@ Make sure that you have setup whichever switchport on your switch to be a dot1q 
                         <p class="pull-right text-right">
                             <small><em>Proudly powered by <a href="http://docs.getpelican.com/" target="_blank">pelican</a></em></small><br/>
                             <small><em>Theme and code by <a href="http://www.molivier.com/" target="_blank">molivier</a></em></small><br/>
-                            <small>&copy; Tait Clarridge 2015</small>
+                            <small>&copy; Tait Clarridge 2019</small>
                         </p>
                     </div>
                 </div>

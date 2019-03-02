@@ -4,21 +4,21 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Recently my Shuttle HTPC started having issues when booting into Gnome using any sort of hardware video acceleration. I would turn it on and watch it boot until it got to the login screen, at this ...">
+        <meta name="description" content="Recently my Shuttle HTPC started having issues when booting into Gnome using any sort of hardware video acceleration. I would turn it on and watch it boot until it got to the login screen, at this...">
         <meta name="keywords" content="audio, hdmi, linux">
-        <link rel="icon" href="http://www.taitclarridge.com/favicon.ico">
+        <link rel="icon" href="https://oldmantaiter.dev/favicon.ico">
 
         <title>nVIDIA GT210 - HDMI Audio - oldmantaiter</title>
 
         <!-- Stylesheets -->
-        <link href="http://www.taitclarridge.com/theme/css/all.min.css" rel="stylesheet">
+        <link href="https://oldmantaiter.dev/theme/css/all.min.css" rel="stylesheet">
         <!-- /Stylesheets -->
 
         <!-- RSS Feeds -->
-        <link href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
         <!-- /RSS Feeds -->
 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -50,11 +50,9 @@
             <div class="container">
                 <div class="header-nav">
                     <div class="header-logo">
-                        <a class="pull-left" href="http://www.taitclarridge.com/">oldmantaiter</a>
+                        <a class="pull-left" href="https://oldmantaiter.dev/">oldmantaiter</a>
                     </div>
                     <div class="nav pull-right">
-                            <a href="http://www.taitclarridge.com/about.html">About</a>
-                            <a href="http://www.taitclarridge.com/archives.html">Archives</a>
                     </div>
                 </div>
             </div>
@@ -67,12 +65,12 @@
               <div class="col-lg-12">
                   <div class="header-content">
                       <h1 class="header-title">nVIDIA GT210 - HDMI Audio</h1>
-                      <p class="header-date">By <a href="http://www.taitclarridge.com/author/tait-clarridge.html">Tait Clarridge</a>, Fri 16 July 2010, Category <a href="http://www.taitclarridge.com/category/linux.html">Linux</a></p>
+                      <p class="header-date">By <a href="https://oldmantaiter.dev/author/tait-clarridge.html">Tait Clarridge</a>, Fri 16 July 2010, Category <a href="https://oldmantaiter.dev/category/linux.html">Linux</a></p>
                       <div class="header-underline"></div>
                       <div class="clearfix"></div>
                       <p class="pull-right header-tags">
                           <span class="glyphicon glyphicon-tags mr5" aria-hidden="true"></span>
-<a href="http://www.taitclarridge.com/tag/audio.html">audio</a>, <a href="http://www.taitclarridge.com/tag/hdmi.html">hdmi</a>, <a href="http://www.taitclarridge.com/tag/linux.html">linux</a>                      </p>
+<a href="https://oldmantaiter.dev/tag/audio.html">audio</a>, <a href="https://oldmantaiter.dev/tag/hdmi.html">hdmi</a>, <a href="https://oldmantaiter.dev/tag/linux.html">linux</a>                      </p>
                   </div>
               </div>
         </div>
@@ -95,19 +93,19 @@ To get sound output, I first needed to turn off the onboard HD audio from the BI
 <p>First I noticed that the prerequisites for their version required alsa 1.0.23 drivers. Fedora only had 1.0.21 by default so I needed to grab packages from ATrpms.</p>
 <p>I added the repo for yum as follows:</p>
 <p>Create the file <strong>/etc/yum.repos.d/atrpms.repo</strong> with the following contents:</p>
-<div class="highlight"><pre><span class="go">[atrpms]</span>
+<div class="highlight"><pre><span></span><span class="go">[atrpms]</span>
 <span class="go">name=Fedora Core $releasever - $basearch - ATrpms</span>
-<span class="go">baseurl=http://dl.atrpms.net/f$releasever-$basearch/atrpms/stable</span>
+<span class="gp">baseurl=http://dl.atrpms.net/f$releasever-$</span>basearch/atrpms/stable
 <span class="go">gpgkey=http://atrpms.net/RPM-GPG-KEY.atrpms</span>
 <span class="go">gpgcheck=1</span>
 </pre></div>
 <p>Then you can run</p>
-<div class="highlight"><pre><span class="gp">[root@tclarrltp ~]#</span> yum install alsa-driver
+<div class="highlight"><pre><span></span><span class="gp">[root@tclarrltp ~]#</span> yum install alsa-driver
 </pre></div>
 <p>Install any dependencies that are required.</p>
 <p>Next you need to configure the hd sound module to work properly. As it stands right now, your machine will probably tell you that it has 4 SPDIF outputs for the card, this will not work so we have to change it.</p>
 <p>Create the file <strong>/etc/modprobe.d/sound.conf</strong> with the following contents:</p>
-<div class="highlight"><pre><span class="go">options snd-hda-intel enable_msi=0 probe_mask=0xfff2</span>
+<div class="highlight"><pre><span></span><span class="go">options snd-hda-intel enable_msi=0 probe_mask=0xfff2</span>
 </pre></div>
 <p>Now reboot your machine, a quick look at <strong>/proc/asound/version</strong> should show that the drivers are now at 1.0.23.</p>
 <p>At this point you should have some sound, but if you don't fire up alsamixer and change the soundcard  to the nVIDIA card and see if the line is muted. If it is muted, just press &quot;m&quot; to unmute.</p>
@@ -120,7 +118,7 @@ To get sound output, I first needed to turn off the onboard HD audio from the BI
                     <script type="text/javascript">
                         var disqus_shortname = 'oldmantaiter';
                         var disqus_identifier = 'techlog/2010/07/nvidia-gt210-hdmi-audio.html';
-                        var disqus_url = 'http://www.taitclarridge.com/techlog/2010/07/nvidia-gt210-hdmi-audio.html';
+                        var disqus_url = 'https://oldmantaiter.dev/techlog/2010/07/nvidia-gt210-hdmi-audio.html';
                         (function() {
                             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
                             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
@@ -139,11 +137,11 @@ To get sound output, I first needed to turn off the onboard HD audio from the BI
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
                         <div class="footer-title">Sitemap</div>
                         <ul class="list-unstyled">
-                            <li><a href="http://www.taitclarridge.com/archives.html">Archives</a></li>
-                            <li><a href="http://www.taitclarridge.com/tags.html">Tags</a></li>
-                            <li><a href="http://www.taitclarridge.com/authors.html">Authors</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/archives.html">Archives</a></li>
+                            <li><a href="https://oldmantaiter.dev/tags.html">Tags</a></li>
+                            <li><a href="https://oldmantaiter.dev/authors.html">Authors</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
                         </ul>
                     </div>
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
@@ -159,7 +157,7 @@ To get sound output, I first needed to turn off the onboard HD audio from the BI
                         <p class="pull-right text-right">
                             <small><em>Proudly powered by <a href="http://docs.getpelican.com/" target="_blank">pelican</a></em></small><br/>
                             <small><em>Theme and code by <a href="http://www.molivier.com/" target="_blank">molivier</a></em></small><br/>
-                            <small>&copy; Tait Clarridge 2015</small>
+                            <small>&copy; Tait Clarridge 2019</small>
                         </p>
                     </div>
                 </div>

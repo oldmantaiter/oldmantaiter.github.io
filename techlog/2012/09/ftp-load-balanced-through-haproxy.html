@@ -4,21 +4,21 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="I was asked to explore the possibility of having haproxy balance connections between multiple backend FTP servers. Luckily there is a way to do this without having to play with DNAT on the proxy ...">
+        <meta name="description" content="I was asked to explore the possibility of having haproxy balance connections between multiple backend FTP servers. Luckily there is a way to do this without having to play with DNAT on the proxy...">
         <meta name="keywords" content="ftp, haproxy">
-        <link rel="icon" href="http://www.taitclarridge.com/favicon.ico">
+        <link rel="icon" href="https://oldmantaiter.dev/favicon.ico">
 
         <title>FTP Load-Balanced through haproxy - oldmantaiter</title>
 
         <!-- Stylesheets -->
-        <link href="http://www.taitclarridge.com/theme/css/all.min.css" rel="stylesheet">
+        <link href="https://oldmantaiter.dev/theme/css/all.min.css" rel="stylesheet">
         <!-- /Stylesheets -->
 
         <!-- RSS Feeds -->
-        <link href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
         <!-- /RSS Feeds -->
 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -50,11 +50,9 @@
             <div class="container">
                 <div class="header-nav">
                     <div class="header-logo">
-                        <a class="pull-left" href="http://www.taitclarridge.com/">oldmantaiter</a>
+                        <a class="pull-left" href="https://oldmantaiter.dev/">oldmantaiter</a>
                     </div>
                     <div class="nav pull-right">
-                            <a href="http://www.taitclarridge.com/about.html">About</a>
-                            <a href="http://www.taitclarridge.com/archives.html">Archives</a>
                     </div>
                 </div>
             </div>
@@ -67,12 +65,12 @@
               <div class="col-lg-12">
                   <div class="header-content">
                       <h1 class="header-title">FTP Load-Balanced through haproxy</h1>
-                      <p class="header-date">By <a href="http://www.taitclarridge.com/author/tait-clarridge.html">Tait Clarridge</a>, Fri 14 September 2012, Category <a href="http://www.taitclarridge.com/category/linux.html">Linux</a></p>
+                      <p class="header-date">By <a href="https://oldmantaiter.dev/author/tait-clarridge.html">Tait Clarridge</a>, Fri 14 September 2012, Category <a href="https://oldmantaiter.dev/category/linux.html">Linux</a></p>
                       <div class="header-underline"></div>
                       <div class="clearfix"></div>
                       <p class="pull-right header-tags">
                           <span class="glyphicon glyphicon-tags mr5" aria-hidden="true"></span>
-<a href="http://www.taitclarridge.com/tag/ftp.html">ftp</a>, <a href="http://www.taitclarridge.com/tag/haproxy.html">haproxy</a>                      </p>
+<a href="https://oldmantaiter.dev/tag/ftp.html">ftp</a>, <a href="https://oldmantaiter.dev/tag/haproxy.html">haproxy</a>                      </p>
                   </div>
               </div>
         </div>
@@ -89,7 +87,7 @@
         <p>I was asked to explore the possibility of having haproxy balance connections between multiple backend FTP servers. Luckily there is a way to do this without having to play with DNAT on the proxy server and instead setting it up with multiple backends in haproxy.</p>
 <p>First you will need to setup a few FTP servers. I chose VSFTP (which can be installed on CentOS via &quot;yum install vsftpd&quot;)</p>
 <p>As far as I know, this will only work properly with ftp passive mode. For that you can make the following vsftpd config</p>
-<div class="highlight"><pre><span class="gp">[tait@foxtrot-tango-papa01 ~]$</span> cat /etc/vsftpd/vsftpd.conf
+<div class="highlight"><pre><span></span><span class="gp">[tait@foxtrot-tango-papa01 ~]$</span> cat /etc/vsftpd/vsftpd.conf
 <span class="go">anonymous_enable=NO</span>
 <span class="go">local_enable=YES</span>
 <span class="go">write_enable=YES</span>
@@ -101,7 +99,7 @@
 <span class="go">xferlog_std_format=YES</span>
 <span class="go">pam_service_name=vsftpd</span>
 
-<span class="go"># This is a user whitelist we use</span>
+<span class="gp">#</span> This is a user whitelist we use
 <span class="go">userlist_enable=YES</span>
 <span class="go">userlist_deny=NO</span>
 <span class="go">userlist_file=/etc/vsftpd/user_list</span>
@@ -111,13 +109,13 @@
 <span class="go">port_enable=YES</span>
 <span class="go">port_promiscious=NO</span>
 
-<span class="go"># Added listen address for internal only</span>
+<span class="gp">#</span> Added listen address <span class="k">for</span> internal only
 <span class="go">listen=YES</span>
-<span class="go"># If you use this method, change the listen_address for each server (duh)</span>
+<span class="gp">#</span> If you use this method, change the listen_address <span class="k">for</span> each server <span class="o">(</span>duh<span class="o">)</span>
 <span class="go">listen_address=10.0.0.10</span>
 
-<span class="go"># These are the ports to use for PASV mode</span>
-<span class="go"># It is important that these port numbers are unique across each of your backend servers</span>
+<span class="gp">#</span> These are the ports to use <span class="k">for</span> PASV mode
+<span class="gp">#</span> It is important that these port numbers are unique across each of your backend servers
 <span class="go">pasv_min_port=10000</span>
 <span class="go">pasv_max_port=10250</span>
 </pre></div>
@@ -129,9 +127,9 @@ foxtrot-tango-papa03: 10501 -&gt; 10750</p>
 <p>Ensure that your configuration works on each node and try sample ftp connections to each of your servers before we proceed to configuring and using haproxy for the frontend.</p>
 <p>Download and install haproxy, you can either do this by source or through a 3rd party repository.</p>
 <p>This is what my config (very basic) looks like.</p>
-<div class="highlight"><pre><span class="gp">[tait@ftp-proxy01]$</span> cat /etc/haproxy/haproxy.cfg
-<span class="go"># HAPROXY Config for FTP</span>
-<span class="go"># my apologies for the spacing</span>
+<div class="highlight"><pre><span></span><span class="gp">[tait@ftp-proxy01]$</span> cat /etc/haproxy/haproxy.cfg
+<span class="gp">#</span> HAPROXY Config <span class="k">for</span> FTP
+<span class="gp">#</span> my apologies <span class="k">for</span> the spacing
 <span class="go">global</span>
 <span class="go">    log 127.0.0.1 local0 info</span>
 <span class="go">    chroot /var/lib/haproxy</span>
@@ -145,12 +143,12 @@ foxtrot-tango-papa03: 10501 -&gt; 10750</p>
 <span class="go">    option tcplog</span>
 <span class="go">    retries 3</span>
 
-<span class="go"># This is for the initial connection and control traffic</span>
+<span class="gp">#</span> This is <span class="k">for</span> the initial connection and control traffic
 <span class="go">frontend foxtrot-tango-papa-control</span>
 <span class="go">    bind *:21</span>
 <span class="go">    default_backend ftp_server_pool</span>
 
-<span class="go"># Each of these frontends represent a server and its corresponding PASV ports we set</span>
+<span class="gp">#</span> Each of these frontends represent a server and its corresponding PASV ports we <span class="nb">set</span>
 <span class="go">frontend foxtrot-tango-papa01</span>
 <span class="go">    bind *:10001-10250</span>
 <span class="go">    default_backend foxtrot_tango_papa01</span>
@@ -163,13 +161,13 @@ foxtrot-tango-papa03: 10501 -&gt; 10750</p>
 <span class="go">    bind *:10501-10750</span>
 <span class="go">    default_backend foxtrot_tango_papa03</span>
 
-<span class="go"># Global backend for the ftp control traffic to find a server</span>
+<span class="gp">#</span> Global backend <span class="k">for</span> the ftp control traffic to find a server
 <span class="go">backend ftp_server_pool</span>
 <span class="go">    server foxtrot-tango-papa01 10.0.0.10 check port 21 inter 10s rise 1 fall 2</span>
 <span class="go">    server foxtrot-tango-papa02 10.0.0.11 check port 21 inter 10s rise 1 fall 2</span>
 <span class="go">    server foxtrot-tango-papa03 10.0.0.12 check port 21 inter 10s rise 1 fall 2</span>
 
-<span class="go"># Backends for each of our FTP servers</span>
+<span class="gp">#</span> Backends <span class="k">for</span> each of our FTP servers
 <span class="go">backend foxtrot_tango_papa01</span>
 <span class="go">    server foxtrot-tango-papa01 10.0.0.10 check port 21 inter 10s rise 1 fall 2</span>
 
@@ -190,7 +188,7 @@ foxtrot-tango-papa03: 10501 -&gt; 10750</p>
                     <script type="text/javascript">
                         var disqus_shortname = 'oldmantaiter';
                         var disqus_identifier = 'techlog/2012/09/ftp-load-balanced-through-haproxy.html';
-                        var disqus_url = 'http://www.taitclarridge.com/techlog/2012/09/ftp-load-balanced-through-haproxy.html';
+                        var disqus_url = 'https://oldmantaiter.dev/techlog/2012/09/ftp-load-balanced-through-haproxy.html';
                         (function() {
                             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
                             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
@@ -209,11 +207,11 @@ foxtrot-tango-papa03: 10501 -&gt; 10750</p>
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
                         <div class="footer-title">Sitemap</div>
                         <ul class="list-unstyled">
-                            <li><a href="http://www.taitclarridge.com/archives.html">Archives</a></li>
-                            <li><a href="http://www.taitclarridge.com/tags.html">Tags</a></li>
-                            <li><a href="http://www.taitclarridge.com/authors.html">Authors</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/archives.html">Archives</a></li>
+                            <li><a href="https://oldmantaiter.dev/tags.html">Tags</a></li>
+                            <li><a href="https://oldmantaiter.dev/authors.html">Authors</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
                         </ul>
                     </div>
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
@@ -229,7 +227,7 @@ foxtrot-tango-papa03: 10501 -&gt; 10750</p>
                         <p class="pull-right text-right">
                             <small><em>Proudly powered by <a href="http://docs.getpelican.com/" target="_blank">pelican</a></em></small><br/>
                             <small><em>Theme and code by <a href="http://www.molivier.com/" target="_blank">molivier</a></em></small><br/>
-                            <small>&copy; Tait Clarridge 2015</small>
+                            <small>&copy; Tait Clarridge 2019</small>
                         </p>
                     </div>
                 </div>

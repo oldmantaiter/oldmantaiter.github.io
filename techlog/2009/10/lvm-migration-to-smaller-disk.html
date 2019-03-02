@@ -4,21 +4,21 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Recently I purchased an SSD (OCZ Agility 60GB) to put into my Asus EEEPC-1000HE and wanted to migrate everything from my default 160GB drive to the new SSD. This required resizing of the LVM prior to ...">
+        <meta name="description" content="Recently I purchased an SSD (OCZ Agility 60GB) to put into my Asus EEEPC-1000HE and wanted to migrate everything from my default 160GB drive to the new SSD. This required resizing of the LVM prior...">
         <meta name="keywords" content="linux, lvm">
-        <link rel="icon" href="http://www.taitclarridge.com/favicon.ico">
+        <link rel="icon" href="https://oldmantaiter.dev/favicon.ico">
 
         <title>LVM Migration to smaller disk - oldmantaiter</title>
 
         <!-- Stylesheets -->
-        <link href="http://www.taitclarridge.com/theme/css/all.min.css" rel="stylesheet">
+        <link href="https://oldmantaiter.dev/theme/css/all.min.css" rel="stylesheet">
         <!-- /Stylesheets -->
 
         <!-- RSS Feeds -->
-        <link href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
-        <link href="http://www.taitclarridge.com/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Full Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Full RSS Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.atom.xml" type="application/atom+xml" rel="alternate" title="oldmantaiter Categories Atom Feed" />
+        <link href="https://oldmantaiter.dev/feeds/linux.rss.xml" type="application/rss+xml" rel="alternate" title="oldmantaiter Categories RSS Feed" />
         <!-- /RSS Feeds -->
 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -50,11 +50,9 @@
             <div class="container">
                 <div class="header-nav">
                     <div class="header-logo">
-                        <a class="pull-left" href="http://www.taitclarridge.com/">oldmantaiter</a>
+                        <a class="pull-left" href="https://oldmantaiter.dev/">oldmantaiter</a>
                     </div>
                     <div class="nav pull-right">
-                            <a href="http://www.taitclarridge.com/about.html">About</a>
-                            <a href="http://www.taitclarridge.com/archives.html">Archives</a>
                     </div>
                 </div>
             </div>
@@ -67,12 +65,12 @@
               <div class="col-lg-12">
                   <div class="header-content">
                       <h1 class="header-title">LVM Migration to smaller disk</h1>
-                      <p class="header-date">By <a href="http://www.taitclarridge.com/author/tait-clarridge.html">Tait Clarridge</a>, Tue 20 October 2009, Category <a href="http://www.taitclarridge.com/category/linux.html">Linux</a></p>
+                      <p class="header-date">By <a href="https://oldmantaiter.dev/author/tait-clarridge.html">Tait Clarridge</a>, Tue 20 October 2009, Category <a href="https://oldmantaiter.dev/category/linux.html">Linux</a></p>
                       <div class="header-underline"></div>
                       <div class="clearfix"></div>
                       <p class="pull-right header-tags">
                           <span class="glyphicon glyphicon-tags mr5" aria-hidden="true"></span>
-<a href="http://www.taitclarridge.com/tag/linux.html">linux</a>, <a href="http://www.taitclarridge.com/tag/lvm.html">lvm</a>                      </p>
+<a href="https://oldmantaiter.dev/tag/linux.html">linux</a>, <a href="https://oldmantaiter.dev/tag/lvm.html">lvm</a>                      </p>
                   </div>
               </div>
         </div>
@@ -128,16 +126,16 @@
 <p>You will need to make sure the drives aren't mounted anywhere, this is shown below.
 There are a few ways you can do this, but the easiest way is to fire up a terminal and become the superuser (root):</p>
 <p>In the terminal:</p>
-<div class="highlight"><pre><span class="gp">[liveuser@host ~]$</span> su -
+<div class="highlight"><pre><span></span><span class="gp">[liveuser@host ~]$</span> su -
 <span class="gp">[root@host ~]#</span> mount
 </pre></div>
 <p>If there is anything that shows /dev/sdb1 (old hard drive) or your volume groups (they shouldn't be mounted in a live system), unmount them with:</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> umount /dev/sdb1
-<span class="go"># Or for volume group</span>
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> umount /dev/sdb1
+<span class="gp">#</span> Or <span class="k">for</span> volume group
 <span class="gp">[root@host ~]#</span> umount /dev/vg_yourvg-lv_yourlv
 </pre></div>
 <p>Now lets list the disks</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> fdisk -l
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> fdisk -l
 <span class="go">Disk /dev/sda: 60.0GB, xxxxxxxxxxxxx bytes</span>
 <span class="go">xxx heads, xx sectors/track, xxxxx cylinders</span>
 <span class="go">Units = cylinders of xxxxx * xxx = xxxxxxxx bytes</span>
@@ -145,7 +143,7 @@ There are a few ways you can do this, but the easiest way is to fire up a termin
 
 <span class="go"> Disk /dev/sda doesn&#39;t contain a valid partition table</span>
 
-<span class="go"># (this is normal if the disk is new)</span>
+<span class="gp">#</span> <span class="o">(</span>this is normal <span class="k">if</span> the disk is new<span class="o">)</span>
 
 <span class="go">Disk /dev/sdb: 160.0GB, xxxxxxxxxxxxxx bytes</span>
 <span class="go">xxx heads, xx sectors/track, xxxxx cylinders</span>
@@ -165,14 +163,14 @@ There are a few ways you can do this, but the easiest way is to fire up a termin
 <h2>Step Six: Create partition layout on new HDD</h2>
 <p>Since we now have the drive names, we can go ahead and partition the new disk to have the two partitions (your disk setup might be different, mine had /boot on the first partition and the LVM on the second partition).</p>
 <p><strong>EDIT</strong> from the future: I'm showing fdisk here, but you can do the same thing with any partition editing (I prefer parted these days)</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> fdisk /dev/sda
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> fdisk /dev/sda
 
 <span class="go">Command (m for help): o</span>
 <span class="go">Building a new DOS disklabel with disk identifier xxxxxxxxxxxx</span>
 <span class="go">Changes will remain in memory only, until you decide to write them.</span>
 <span class="go">After that, of course, the previous content won&#39;t be recoverable.</span>
 
-<span class="go">### If you get a warning about invalid flags, those are OK too.</span>
+<span class="gp">#</span><span class="c1">## If you get a warning about invalid flags, those are OK too.</span>
 
 <span class="go">Command (m for help): n</span>
 <span class="go">Command action</span>
@@ -181,7 +179,7 @@ There are a few ways you can do this, but the easiest way is to fire up a termin
 <span class="go">p (this is my input)</span>
 <span class="go">Partition number (1-4): 1</span>
 <span class="go">First cylinder (1-xxxx, default 1): 1</span>
-<span class="go">### I chose 250 MB for extra kernel installs/preupgrade</span>
+<span class="gp">#</span><span class="c1">## I chose 250 MB for extra kernel installs/preupgrade</span>
 <span class="go">Last cylinder, +cylinders or +size{K,M,G} (1-xxx, default xxx): +250M</span>
 
 <span class="go">Command (m for help): n</span>
@@ -190,7 +188,7 @@ There are a few ways you can do this, but the easiest way is to fire up a termin
 <span class="go">   p    primary partition (1-4)</span>
 <span class="go">p</span>
 <span class="go">Partition number (1-4): 2</span>
-<span class="go">### Pressing enter through these should make it the rest of the disk</span>
+<span class="gp">#</span><span class="c1">## Pressing enter through these should make it the rest of the disk</span>
 <span class="go">First cylinder (xx-xxxx, default xxx): &lt;press enter&gt;</span>
 <span class="go">Using default value xxx</span>
 <span class="go">Last cylinder, +cylinders or +size{K,M,G} (xx-xxxx, default xxxx): &lt;press enter&gt;</span>
@@ -211,7 +209,7 @@ There are a few ways you can do this, but the easiest way is to fire up a termin
 </div>
 <div class="section" id="step-seven-copy-the-boot-partition-from-the-old-drive-to-the-new-drive-and-resize-it">
 <h2>Step Seven: Copy the boot partition from the old drive to the new drive and resize it</h2>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> e2fsck -f /dev/sdb1
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> e2fsck -f /dev/sdb1
 <span class="go">&lt;Output of e2fsck snipped&gt;</span>
 <span class="gp">[root@host ~]#</span> dd <span class="k">if</span><span class="o">=</span>/dev/sdb1 <span class="nv">of</span><span class="o">=</span>/dev/sda1
 <span class="go">&lt;Output of dd snipped&gt;</span>
@@ -232,7 +230,7 @@ There are a few ways you can do this, but the easiest way is to fire up a termin
 <li><strong>Volume Group</strong>: vg_taitsstuff</li>
 </ul>
 <p>The columns shown below are the only ones you should be concerned with.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> lvs
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> lvs
 <span class="go">LV            VG                  LSize</span>
 <span class="go">lv_root     vg_taitsstuff      144.xxG</span>
 <span class="go">lv_swap     vg_taitsstuff      4.xG</span>
@@ -242,7 +240,7 @@ There are a few ways you can do this, but the easiest way is to fire up a termin
 lv_swap is located on vg_taitstuff and is 4.xG in size</p>
 <p>Now we can look at the information for the volume groups:</p>
 <p>The columns that have been omitted are unimportant at this point.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> vgs
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> vgs
 <span class="go">VG              #PV  #LV  #SN  VSize VFree</span>
 <span class="go">vg_taitsstuff  1        2      0    148.xxG   0</span>
 </pre></div>
@@ -250,7 +248,7 @@ lv_swap is located on vg_taitstuff and is 4.xG in size</p>
 <p>vg_taitstuff is 148.xxG in size with no free space located on ONE physical volume and contains TWO logical volumes.</p>
 <p>So finally lets take a look at the physical volumes:
 Again, the omitted columns aren't important to us right now.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> pvs
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> pvs
 <span class="go">PV             VG               PSize    PFree</span>
 <span class="go">/dev/sdb2  vg_taitsstuff   148.xxG    0</span>
 </pre></div>
@@ -263,32 +261,32 @@ The name of the physical volume (mine: /dev/sdb2)</p>
 <h2>Step Nine: Remove SWAP logical volume</h2>
 <p>I was having issues with resizing due to the placement of my SWAP logical volume, so what I did was remove it (it will be recreated later with the information from the above section).</p>
 <p>So, lets turn the swap off and remove it:</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> swapoff -v /dev/vg_taitsstuff/lv_swap
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> swapoff -v /dev/vg_taitsstuff/lv_swap
 <span class="gp">[root@host ~]#</span> lvremove /dev/vg_taitsstuff/lv_swap
 </pre></div>
 </div>
 <div class="section" id="step-ten-resize-root-logical-volume">
 <h2>Step Ten: Resize ROOT logical volume</h2>
 <p>Since I have only one logical volume for my system (other than the swap we just deleted) this is relatively straightforward, if you have multiple partitions I am not able to help you at the moment.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> e2fsck -f /dev/vg_taitsstuff/lv_root
-<span class="go"># 50G was chosen so it was smaller than the size of the HDD, noobish I know.</span>
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> e2fsck -f /dev/vg_taitsstuff/lv_root
+<span class="gp">#</span> 50G was chosen so it was smaller than the size of the HDD, noobish I know.
 <span class="gp">[root@host ~]#</span> resize2fs -p /dev/vg_taittstuff/lv_root 50G
 <span class="gp">[root@host ~]#</span> lvreduce --size 50G vg_taitsstuff/lv_root --test
-<span class="go"># If there were any errors in the test, do not issue the next command</span>
+<span class="gp">#</span> If there were any errors in the test, <span class="k">do</span> not issue the next <span class="nb">command</span>
 <span class="gp">[root@host ~]#</span> lvreduce --size 50G vg_taitsstuff/lv_root
 </pre></div>
 </div>
 <div class="section" id="step-eleven-resize-the-physical-volume">
 <h2>Step Eleven: Resize the physical volume</h2>
 <p>Now we can resize the volume so it will fit in our new partition on the new disk.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> pvresize --setphysicalvolumesize 55G /dev/sdb2
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> pvresize --setphysicalvolumesize 55G /dev/sdb2
 </pre></div>
 <p>This should complete successfully. The reason why I chose 55G was that it was greater than the filesystem size we set in Step 10 and less than the new hard drive size (60 GB)</p>
 </div>
 <div class="section" id="step-twelve-copy-the-old-partition-to-the-new-drive">
 <h2>Step Twelve: Copy the old partition to the new drive</h2>
 <p>Some people may argue that I am taking a round about way to do this, I did it this way because it made sense at the time. I tried migrating the volume groups without success so I did it this way.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> dd <span class="k">if</span><span class="o">=</span>/dev/sdb2 <span class="nv">of</span><span class="o">=</span>/dev/sda2
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> dd <span class="k">if</span><span class="o">=</span>/dev/sdb2 <span class="nv">of</span><span class="o">=</span>/dev/sda2
 </pre></div>
 <p>This will take a while depending on the size, also it may tell you that it ran out of space, this should be alright because it will already be finished writing the physical volume that we resized in the previous step.</p>
 </div>
@@ -298,26 +296,26 @@ The name of the physical volume (mine: /dev/sdb2)</p>
 <div class="section" id="step-fourteen-resize-the-pv-on-the-new-drive">
 <h2>Step Fourteen: Resize the PV on the new drive</h2>
 <p>This step is so we can get full use of our LVM partition.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> pvresize /dev/sda2
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> pvresize /dev/sda2
 </pre></div>
 </div>
 <div class="section" id="step-fifteen-resize-the-logical-volume-and-filesystem-on-the-new-drive-and-create-the-new-swap-logical-volume">
 <h2>Step Fifteen: Resize the logical volume and filesystem on the new drive and create the new swap logical volume</h2>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> lvextend /dev/vg_taitsstuff/lv_root /dev/sda2
-<span class="go"># 4GB here is the size of the swap partition I want</span>
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> lvextend /dev/vg_taitsstuff/lv_root /dev/sda2
+<span class="gp">#</span> 4GB here is the size of the swap partition I want
 <span class="gp">[root@host ~]#</span> lvreduce --size -4G vg_taitsstuff/lv_root
 <span class="gp">[root@host ~]#</span> lvcreate --name lv_swap vg_taitsstuff
-<span class="go"># There are a lot of these filesystem checks, some may say too many, but lets be safe</span>
+<span class="gp">#</span> There are a lot of these filesystem checks, some may say too many, but lets be safe
 <span class="gp">[root@host ~]#</span> e2fsck -f /dev/vg_taitsstuff/lv_root
 <span class="gp">[root@host ~]#</span> resize2fs /dev/vg_taitsstuff/lv_root
-<span class="go"># Lets bring back that swap LV</span>
+<span class="gp">#</span> Lets bring back that swap LV
 <span class="gp">[root@host ~]#</span> mkswap /dev/vg_taitsstuff/lv_swap
 </pre></div>
 </div>
 <div class="section" id="step-seventeen-reinstall-grub-on-the-new-drive">
 <h2>Step Seventeen: Reinstall GRUB on the new drive</h2>
 <p>We need to activate the vg, mount the partitions, and reinstall grub.</p>
-<div class="highlight"><pre><span class="gp">[root@host ~]#</span> mkdir -p /mnt/temp/boot
+<div class="highlight"><pre><span></span><span class="gp">[root@host ~]#</span> mkdir -p /mnt/temp/boot
 <span class="gp">[root@host ~]#</span> vgchange -a y
 <span class="gp">[root@host ~]#</span> mount /dev/sda1 /mnt/temp/boot
 <span class="gp">[root@host ~]#</span> mount /dev/vg_taitsstuff/lv_root /mnt/temp
@@ -328,7 +326,7 @@ The name of the physical volume (mine: /dev/sdb2)</p>
 <h2>Step Eighteen: Reboot</h2>
 <p>Now that everything has reinstalled and been resized, it is time for a reboot! If your grub menu is just a prompt, not to worry.</p>
 <p>Just enter the following commands in the grub prompt (grub&gt;)</p>
-<div class="highlight"><pre><span class="go">grub&gt; kernel /vmlinuz-2.6.rest.of.your.kernel.version</span>
+<div class="highlight"><pre><span></span><span class="go">grub&gt; kernel /vmlinuz-2.6.rest.of.your.kernel.version</span>
 <span class="go">grub&gt; initrd /initrd-2.6.same.as.above</span>
 </pre></div>
 <p>If you do not know the kernel version off hand, you can press tab twice after entering kernel and a forward slash and it will show the available versions. The same goes for the ramdisk (initrd), just make sure that the ramdisk version and the kernel version are the same.</p>
@@ -343,7 +341,7 @@ The name of the physical volume (mine: /dev/sdb2)</p>
                     <script type="text/javascript">
                         var disqus_shortname = 'oldmantaiter';
                         var disqus_identifier = 'techlog/2009/10/lvm-migration-to-smaller-disk.html';
-                        var disqus_url = 'http://www.taitclarridge.com/techlog/2009/10/lvm-migration-to-smaller-disk.html';
+                        var disqus_url = 'https://oldmantaiter.dev/techlog/2009/10/lvm-migration-to-smaller-disk.html';
                         (function() {
                             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
                             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
@@ -362,11 +360,11 @@ The name of the physical volume (mine: /dev/sdb2)</p>
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
                         <div class="footer-title">Sitemap</div>
                         <ul class="list-unstyled">
-                            <li><a href="http://www.taitclarridge.com/archives.html">Archives</a></li>
-                            <li><a href="http://www.taitclarridge.com/tags.html">Tags</a></li>
-                            <li><a href="http://www.taitclarridge.com/authors.html">Authors</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
-                            <li><a href="http://www.taitclarridge.com/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/archives.html">Archives</a></li>
+                            <li><a href="https://oldmantaiter.dev/tags.html">Tags</a></li>
+                            <li><a href="https://oldmantaiter.dev/authors.html">Authors</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">Atom Feed</a></li>
+                            <li><a href="https://oldmantaiter.dev/feeds/all.rss.xml" type="application/rss+xml" rel="alternate">RSS Feed</a></li>
                         </ul>
                     </div>
                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
@@ -382,7 +380,7 @@ The name of the physical volume (mine: /dev/sdb2)</p>
                         <p class="pull-right text-right">
                             <small><em>Proudly powered by <a href="http://docs.getpelican.com/" target="_blank">pelican</a></em></small><br/>
                             <small><em>Theme and code by <a href="http://www.molivier.com/" target="_blank">molivier</a></em></small><br/>
-                            <small>&copy; Tait Clarridge 2015</small>
+                            <small>&copy; Tait Clarridge 2019</small>
                         </p>
                     </div>
                 </div>

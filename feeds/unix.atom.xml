@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>oldmantaiter</title><link href="http://www.taitclarridge.com/" rel="alternate"></link><link href="http://www.taitclarridge.com/feeds/unix.atom.xml" rel="self"></link><id>http://www.taitclarridge.com/</id><updated>2012-03-22T11:00:00-04:00</updated><entry><title>OpenIndiana (Solaris) VLAN Trunk</title><link href="http://www.taitclarridge.com/techlog/2012/03/openindiana-solaris-vlan-trunk.html" rel="alternate"></link><updated>2012-03-22T11:00:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:www.taitclarridge.com,2012-03-22:techlog/2012/03/openindiana-solaris-vlan-trunk.html</id><summary type="html">&lt;p&gt;I recently discovered a need to be able to add multiple VLANs on a single interfaces on Solaris.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>oldmantaiter - Unix</title><link href="https://oldmantaiter.dev/" rel="alternate"></link><link href="https://oldmantaiter.dev/feeds/unix.atom.xml" rel="self"></link><id>https://oldmantaiter.dev/</id><updated>2012-03-22T11:00:00-04:00</updated><entry><title>OpenIndiana (Solaris) VLAN Trunk</title><link href="https://oldmantaiter.dev/techlog/2012/03/openindiana-solaris-vlan-trunk.html" rel="alternate"></link><published>2012-03-22T11:00:00-04:00</published><updated>2012-03-22T11:00:00-04:00</updated><author><name>Tait Clarridge</name></author><id>tag:oldmantaiter.dev,2012-03-22:/techlog/2012/03/openindiana-solaris-vlan-trunk.html</id><summary type="html">&lt;p&gt;I recently discovered a need to be able to add multiple VLANs on a single interfaces on Solaris.&lt;/p&gt;
+&lt;p&gt;This one is really simple! Just make sure you are running as root, not escalating privileges with pfexec.&lt;/p&gt;
+&lt;p&gt;So, lets start this off. Figure out which of your interfaces you want to …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I recently discovered a need to be able to add multiple VLANs on a single interfaces on Solaris.&lt;/p&gt;
 &lt;p&gt;This one is really simple! Just make sure you are running as root, not escalating privileges with pfexec.&lt;/p&gt;
 &lt;p&gt;So, lets start this off. Figure out which of your interfaces you want to use as the trunk, in my case it is atge0.
 Make sure that you have setup whichever switchport on your switch to be a dot1q trunk&lt;/p&gt;
 &lt;p&gt;In this scenario I have my server originally on a switchport just in access mode on VLAN 10. To make it into a trunk (network will drop for around 30 seconds) you can reconfigure the port with the commands below to still be on VLAN 10 if using Cisco.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="go"&gt;taiter-sw# configure terminal&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;taiter-sw# configure terminal&lt;/span&gt;
 &lt;span class="go"&gt;Enter configuration commands, one per line. End with CNTL/Z.&lt;/span&gt;
 &lt;span class="go"&gt;taiter-sw(config)# interface gi0/5&lt;/span&gt;
 &lt;span class="go"&gt;taiter-sw(config-if)# switchport&lt;/span&gt;
@@ -14,11 +16,11 @@ Make sure that you have setup whichever switchport on your switch to be a dot1q 
 &lt;span class="go"&gt;taiter-sw(config-if)# end&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Then issue the following commands (substituting your NIC for where I've put atge0):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;root@taiter:~#&lt;/span&gt; dladm create-vnic -l atge0 -v &lt;span class="m"&gt;30&lt;/span&gt; atge0.30
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;root@taiter:~#&lt;/span&gt; dladm create-vnic -l atge0 -v &lt;span class="m"&gt;30&lt;/span&gt; atge0.30
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The argument for the VLAN is -v VLANID and then you can call your new virtual interface whatever you like. I tend to like the INTERFACE.VLAN naming.&lt;/p&gt;
 &lt;p&gt;Now we can give an IP to the new VNIC.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="gp"&gt;root@taiter:~#&lt;/span&gt; ifconfig atge0.30 plumb 10.1.1.5/24 up
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;root@taiter:~#&lt;/span&gt; ifconfig atge0.30 plumb &lt;span class="m"&gt;10&lt;/span&gt;.1.1.5/24 up
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;I've just shown an example, but obviously change 10.1.1.5/24 to your IP and mask that is on that VLAN.&lt;/p&gt;
-</summary><category term="vlan"></category><category term="networking"></category></entry></feed>
+</content><category term="vlan"></category><category term="networking"></category></entry></feed>
